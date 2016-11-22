@@ -35,7 +35,8 @@ public class StockProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+                        String sortOrder) {
         Cursor returnCursor;
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
@@ -70,10 +71,6 @@ public class StockProvider extends ContentProvider {
 
         returnCursor.setNotificationUri(getContext().getContentResolver(), uri);
 
-//        if (db.isOpen()) {
-//            db.close();
-//        }
-
         return returnCursor;
     }
 
@@ -103,7 +100,6 @@ public class StockProvider extends ContentProvider {
         }
 
         getContext().getContentResolver().notifyChange(uri, null);
-
 
         return returnUri;
     }
@@ -144,8 +140,25 @@ public class StockProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+        final SQLiteDatabase db = dbHelper.getWritableDatabase();
+        int rowsUpdated;
+        switch (uriMatcher.match(uri)) {
+            case QUOTE:
+                rowsUpdated = db.update(Contract.Quote.TABLE_NAME, values,
+                        selection,
+                        selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+
+        }
+        if (rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return rowsUpdated;
+
     }
+
 
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
@@ -173,7 +186,5 @@ public class StockProvider extends ContentProvider {
             default:
                 return super.bulkInsert(uri, values);
         }
-
-
     }
 }

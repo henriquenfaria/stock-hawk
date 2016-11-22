@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.udacity.stockhawk.R;
@@ -48,16 +49,13 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
     }
 
     String getSymbolAtPosition(int position) {
-
         cursor.moveToPosition(position);
         return cursor.getString(Contract.Quote.POSITION_SYMBOL);
     }
 
     @Override
     public StockViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
         View item = LayoutInflater.from(context).inflate(R.layout.list_item_quote, parent, false);
-
         return new StockViewHolder(item);
     }
 
@@ -66,31 +64,44 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
 
         cursor.moveToPosition(position);
 
-
         holder.symbol.setText(cursor.getString(Contract.Quote.POSITION_SYMBOL));
-        holder.price.setText(dollarFormat.format(cursor.getFloat(Contract.Quote.POSITION_PRICE)));
 
-
-        float rawAbsoluteChange = cursor.getFloat(Contract.Quote.POSITION_ABSOLUTE_CHANGE);
-        float percentageChange = cursor.getFloat(Contract.Quote.POSITION_PERCENTAGE_CHANGE);
-
-        if (rawAbsoluteChange > 0) {
-            holder.change.setBackgroundResource(R.drawable.percent_change_pill_green);
+        // Stock quote was not loaded yet
+        if (cursor.isNull(Contract.Quote.POSITION_IS_UNKNOWN)) {
+            holder.priceChangeLayout.setVisibility(View.GONE);
+            holder.stockStatusLayout.setVisibility(View.VISIBLE);
+            holder.stockStatusText.setText(R.string.status_loading);
+        // Stock is unknown
+        } else if (cursor.getInt(Contract.Quote.POSITION_IS_UNKNOWN) == PrefUtils.UNKNOWN_STOCK) {
+            holder.priceChangeLayout.setVisibility(View.GONE);
+            holder.stockStatusLayout.setVisibility(View.VISIBLE);
+            holder.stockStatusText.setText(R.string.status_unknown_stock);
+        // Stock is known and valid
         } else {
-            holder.change.setBackgroundResource(R.drawable.percent_change_pill_red);
+
+            holder.priceChangeLayout.setVisibility(View.VISIBLE);
+            holder.stockStatusLayout.setVisibility(View.GONE);
+            holder.price.setText(dollarFormat.format(cursor.getFloat(Contract.Quote.POSITION_PRICE)));
+
+            float rawAbsoluteChange = cursor.getFloat(Contract.Quote.POSITION_ABSOLUTE_CHANGE);
+            float percentageChange = cursor.getFloat(Contract.Quote.POSITION_PERCENTAGE_CHANGE);
+
+            if (rawAbsoluteChange > 0) {
+                holder.change.setBackgroundResource(R.drawable.percent_change_pill_green);
+            } else {
+                holder.change.setBackgroundResource(R.drawable.percent_change_pill_red);
+            }
+
+            String change = dollarFormatWithPlus.format(rawAbsoluteChange);
+            String percentage = percentageFormat.format(percentageChange / 100);
+
+            if (PrefUtils.getDisplayMode(context)
+                    .equals(context.getString(R.string.pref_display_mode_absolute_key))) {
+                holder.change.setText(change);
+            } else {
+                holder.change.setText(percentage);
+            }
         }
-
-        String change = dollarFormatWithPlus.format(rawAbsoluteChange);
-        String percentage = percentageFormat.format(percentageChange / 100);
-
-        if (PrefUtils.getDisplayMode(context)
-                .equals(context.getString(R.string.pref_display_mode_absolute_key))) {
-            holder.change.setText(change);
-        } else {
-            holder.change.setText(percentage);
-        }
-
-
     }
 
     @Override
@@ -108,6 +119,15 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
     }
 
     class StockViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        @BindView(R.id.price_change_layout)
+        LinearLayout priceChangeLayout;
+
+        @BindView(R.id.stock_status_layout)
+        LinearLayout stockStatusLayout;
+
+        @BindView(R.id.stock_status_text)
+        TextView stockStatusText;
 
         @BindView(R.id.symbol)
         TextView symbol;
@@ -132,7 +152,5 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
             clickHandler.onClick(cursor.getString(symbolColumn));
 
         }
-
-
     }
 }

@@ -15,14 +15,13 @@
     <string name="pref_display_mode_absolute_key">absolute</string>
     <string name="pref_display_mode_percentage_key">percentage</string>
 
+    <!-- TODO: Move to an array -->
     <string name="default_stocks_yahoo">YHOO</string>
     <string name="default_stocks_apple">AAPL</string>
     <string name="default_stocks_microsoft">MSFT</string>
     <string name="default_stocks_facebook">FB</string>
 
-
     <string name="action_change_units">@string/pref_display_mode_key</string>
-
 
     <string name="dialog_title">Add Stock</string>
     <string name="dialog_hint">Symbol (e.g. GOOG)</string>
@@ -35,5 +34,8 @@
 
     <string name="toast_stock_added_no_connectivity">Symbol %s added. Will refresh when network available.</string>
     <string name="toast_no_connectivity">Will refresh when network available.</string>
+
+    <string name="status_loading">Loading...</string>
+    <string name="status_unknown_stock">Unknown Stock</string>
 
 </resources>

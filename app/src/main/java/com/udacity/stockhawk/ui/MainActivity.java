@@ -1,5 +1,6 @@
 package com.udacity.stockhawk.ui;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
@@ -76,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 String symbol = adapter.getSymbolAtPosition(viewHolder.getAdapterPosition());
-                PrefUtils.removeStock(MainActivity.this, symbol);
                 getContentResolver().delete(Contract.Quote.makeUriForStock(symbol), null, null);
             }
         }).attachToRecyclerView(recyclerView);
@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         } else if (!networkUp()) {
             swipeRefreshLayout.setRefreshing(false);
             Toast.makeText(this, R.string.toast_no_connectivity, Toast.LENGTH_LONG).show();
-        } else if (PrefUtils.getStocks(this).size() == 0) {
+        } else if (adapter.getItemCount() == 0) {
             Timber.d("WHYAREWEHERE");
             swipeRefreshLayout.setRefreshing(false);
             error.setText(getString(R.string.error_no_stocks));
@@ -127,7 +127,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 Toast.makeText(this, message, Toast.LENGTH_LONG).show();
             }
 
-            PrefUtils.addStock(this, symbol);
+            ContentValues quoteCV = new ContentValues();
+            quoteCV.put(Contract.Quote.COLUMN_SYMBOL, symbol);
+            getContentResolver().insert(Contract.Quote.uri, quoteCV);
             QuoteSyncJob.syncImmediately(this);
         }
     }
@@ -144,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         swipeRefreshLayout.setRefreshing(false);
 
-        if (data.getCount() != 0) {
+        if (data != null && data.getCount() != 0) {
             error.setVisibility(View.GONE);
         }
         adapter.setCursor(data);
