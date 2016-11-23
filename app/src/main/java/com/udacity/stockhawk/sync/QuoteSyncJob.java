@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
@@ -28,7 +30,6 @@ import yahoofinance.quotes.stock.StockQuote;
 public final class QuoteSyncJob {
 
     static final int ONE_OFF_ID = 2;
-    private static final String ACTION_DATA_UPDATED = "com.udacity.stockhawk.ACTION_DATA_UPDATED";
     private static final int PERIOD = 300000;
     private static final int INITIAL_BACKOFF = 10000;
     private static final int PERIODIC_ID = 1;
@@ -56,15 +57,21 @@ public final class QuoteSyncJob {
 
                     // Stock is available/known and we should update it, otherwise skip it
                     if (!isUnknown) {
+
+
+
                         // TODO: Bulk query as before? Is it faster?
                         Stock stock = YahooFinance.get(symbol);
                         StockQuote quote = stock.getQuote();
                         BigDecimal price = quote.getPrice();
+                        BigDecimal ask = quote.getAsk();
 
                         ContentValues quoteCV = new ContentValues();
 
-                        // The price is null, so this is a unknown stock
-                        if (price == null) {
+                        // The price or ask is null, so this is a unknown stock!
+                        // There are unknown stocks that the price is not null and ask is null,
+                        // that's why we need to check both values
+                        if (price == null || ask == null) {
                             quoteCV.put(Contract.Quote.COLUMN_IS_UNKNOWN, PrefUtils.UNKNOWN_STOCK);
                         } else {
                             BigDecimal change = quote.getChange();
@@ -100,6 +107,9 @@ public final class QuoteSyncJob {
             }
         } catch (IOException exception) {
             Timber.e(exception, "Error fetching stock quotes");
+            Intent broadcastIntent = new Intent();
+            broadcastIntent.setAction(PrefUtils.ACTION_SYNC_ERROR);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
         } finally {
             if (cursor != null) {
                 cursor.close();

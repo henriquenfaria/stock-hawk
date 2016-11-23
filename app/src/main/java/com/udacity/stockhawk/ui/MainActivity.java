@@ -1,15 +1,22 @@
 package com.udacity.stockhawk.ui;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,7 +37,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
+public class MainActivity extends AppCompatActivity implements LoaderManager
+        .LoaderCallbacks<Cursor>,
         SwipeRefreshLayout.OnRefreshListener,
         StockAdapter.StockAdapterOnClickHandler {
 
@@ -44,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @BindView(R.id.error)
     TextView error;
     private StockAdapter adapter;
+    private final SyncErrorReceiver mReceiver = new SyncErrorReceiver();
 
     @Override
     public void onClick(String symbol) {
@@ -56,6 +65,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        firstRunCheck();
 
         adapter = new StockAdapter(this, this);
         recyclerView.setAdapter(adapter);
@@ -70,7 +81,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+                                  RecyclerView.ViewHolder target) {
                 return false;
             }
 
@@ -80,8 +92,23 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 getContentResolver().delete(Contract.Quote.makeUriForStock(symbol), null, null);
             }
         }).attachToRecyclerView(recyclerView);
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mReceiver != null) {
+            LocalBroadcastManager.getInstance(this)
+                    .registerReceiver(mReceiver, new IntentFilter(PrefUtils.ACTION_SYNC_ERROR));
+        }
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mReceiver != null) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
+        }
     }
 
     private boolean networkUp() {
@@ -188,5 +215,59 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private class SyncErrorReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null) {
+                swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(context, R.string.toast_sync_error_try_again, Toast.LENGTH_LONG)
+                        .show();
+            }
+        }
+    }
+
+    // Code based on
+    // http://stackoverflow.com/questions/7217578/check-if-application-is-on-its-first-run
+    private void firstRunCheck() {
+
+        final int DOESNT_EXIST = -1;
+
+        // Get current version code
+        final int currentVersionCode;
+
+        try {
+            currentVersionCode = getPackageManager().getPackageInfo(getPackageName(), 0)
+                    .versionCode;
+        } catch (PackageManager.NameNotFoundException exception) {
+            Timber.e(exception, "Error getting current version code");
+            return;
+        }
+
+        // Get saved version code
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int savedVersionCode = prefs.getInt(getResources().getString(R.string.pref_version_code),
+                DOESNT_EXIST);
+
+        // Check for first run or upgrade
+        if (currentVersionCode == savedVersionCode) {
+            //Normal run. Nothing to do here.
+            return;
+
+        } else if (savedVersionCode == DOESNT_EXIST) {
+            String[] defaultStocks = getResources().getStringArray(R.array.default_stocks);
+            for (int i = 0; i < defaultStocks.length; i++) {
+                ContentValues quoteCV = new ContentValues();
+                quoteCV.put(Contract.Quote.COLUMN_SYMBOL, defaultStocks[i]);
+                getContentResolver().insert(Contract.Quote.uri, quoteCV);
+            }
+
+        } else if (currentVersionCode > savedVersionCode) {
+            //This is an app upgrade. Nothing to do here (yet).
+            return;
+        }
+
+        prefs.edit().putInt(getString(R.string.pref_version_code), currentVersionCode).commit();
     }
 }
