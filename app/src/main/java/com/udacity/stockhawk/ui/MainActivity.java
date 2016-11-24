@@ -30,7 +30,7 @@ import android.widget.Toast;
 
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
-import com.udacity.stockhawk.data.PrefUtils;
+import com.udacity.stockhawk.utils.Utils;
 import com.udacity.stockhawk.sync.QuoteSyncJob;
 
 import butterknife.BindView;
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager
         super.onResume();
         if (mReceiver != null) {
             LocalBroadcastManager.getInstance(this)
-                    .registerReceiver(mReceiver, new IntentFilter(PrefUtils.ACTION_SYNC_ERROR));
+                    .registerReceiver(mReceiver, new IntentFilter(Utils.ACTION_SYNC_ERROR));
         }
     }
 
@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager
 
 
     private void setDisplayModeMenuItemIcon(MenuItem item) {
-        if (PrefUtils.getDisplayMode(this)
+        if (Utils.getDisplayMode(this)
                 .equals(getString(R.string.pref_display_mode_absolute_key))) {
             item.setIcon(R.drawable.ic_percentage);
         } else {
@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_activity_settings, menu);
-        MenuItem item = menu.findItem(R.id.action_change_units);
+        MenuItem item = menu.findItem(R.id.menu_item_change_units);
         setDisplayModeMenuItemIcon(item);
         return true;
     }
@@ -208,8 +208,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_change_units) {
-            PrefUtils.toggleDisplayMode(this);
+        if (id == R.id.menu_item_change_units) {
+            Utils.toggleDisplayMode(this);
             setDisplayModeMenuItemIcon(item);
             adapter.notifyDataSetChanged();
             return true;

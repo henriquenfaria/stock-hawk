@@ -10,10 +10,9 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.udacity.stockhawk.data.Contract;
-import com.udacity.stockhawk.data.PrefUtils;
+import com.udacity.stockhawk.utils.Utils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -52,7 +51,7 @@ public final class QuoteSyncJob {
                     String symbol = cursor.getString(Contract.Quote.POSITION_SYMBOL);
 
                     boolean isUnknown = !cursor.isNull(Contract.Quote.POSITION_IS_UNKNOWN)
-                            && cursor.getInt(Contract.Quote.POSITION_IS_UNKNOWN) == PrefUtils
+                            && cursor.getInt(Contract.Quote.POSITION_IS_UNKNOWN) == Utils
                             .UNKNOWN_STOCK;
 
                     // Stock is available/known and we should update it, otherwise skip it
@@ -72,7 +71,7 @@ public final class QuoteSyncJob {
                         // There are unknown stocks that the price is not null and ask is null,
                         // that's why we need to check both values
                         if (price == null || ask == null) {
-                            quoteCV.put(Contract.Quote.COLUMN_IS_UNKNOWN, PrefUtils.UNKNOWN_STOCK);
+                            quoteCV.put(Contract.Quote.COLUMN_IS_UNKNOWN, Utils.UNKNOWN_STOCK);
                         } else {
                             BigDecimal change = quote.getChange();
                             BigDecimal percentChange = quote.getChangeInPercent();
@@ -97,7 +96,7 @@ public final class QuoteSyncJob {
                             quoteCV.put(Contract.Quote.COLUMN_ABSOLUTE_CHANGE, percentChange
                                     .floatValue());
                             quoteCV.put(Contract.Quote.COLUMN_HISTORY, historyBuilder.toString());
-                            quoteCV.put(Contract.Quote.COLUMN_IS_UNKNOWN, PrefUtils.KNOWN_STOCK);
+                            quoteCV.put(Contract.Quote.COLUMN_IS_UNKNOWN, Utils.KNOWN_STOCK);
 
                         }
                         context.getContentResolver().update(Contract.Quote.uri, quoteCV,
@@ -108,7 +107,7 @@ public final class QuoteSyncJob {
         } catch (IOException exception) {
             Timber.e(exception, "Error fetching stock quotes");
             Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction(PrefUtils.ACTION_SYNC_ERROR);
+            broadcastIntent.setAction(Utils.ACTION_SYNC_ERROR);
             LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
         } finally {
             if (cursor != null) {

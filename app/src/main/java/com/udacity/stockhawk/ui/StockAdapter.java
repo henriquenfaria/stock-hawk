@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
-import com.udacity.stockhawk.data.PrefUtils;
+import com.udacity.stockhawk.utils.Utils;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -72,7 +72,7 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
             holder.stockStatusLayout.setVisibility(View.VISIBLE);
             holder.stockStatusText.setText(R.string.status_loading);
         // Stock is unknown
-        } else if (cursor.getInt(Contract.Quote.POSITION_IS_UNKNOWN) == PrefUtils.UNKNOWN_STOCK) {
+        } else if (cursor.getInt(Contract.Quote.POSITION_IS_UNKNOWN) == Utils.UNKNOWN_STOCK) {
             holder.priceChangeLayout.setVisibility(View.GONE);
             holder.stockStatusLayout.setVisibility(View.VISIBLE);
             holder.stockStatusText.setText(R.string.status_unknown_stock);
@@ -95,7 +95,7 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
             String change = dollarFormatWithPlus.format(rawAbsoluteChange);
             String percentage = percentageFormat.format(percentageChange / 100);
 
-            if (PrefUtils.getDisplayMode(context)
+            if (Utils.getDisplayMode(context)
                     .equals(context.getString(R.string.pref_display_mode_absolute_key))) {
                 holder.change.setText(change);
             } else {
