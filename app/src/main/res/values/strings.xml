@@ -11,10 +11,7 @@
     <string name="pref_display_mode_default" translatable="false" >@string/pref_display_mode_percentage_key</string>
     <string name="pref_display_mode_absolute_key" translatable="false">absolute</string>
     <string name="pref_display_mode_percentage_key" translatable="false">percentage</string>
-
-
     <string name="pref_version_code" translatable="false">versionCode</string>
-
 
     <string name="pref_display_mode_title">Display Mode</string>
     <string name="dialog_title">Add Stock</string>
@@ -25,7 +22,7 @@
     <string name="error_no_network">No network connectivity! Will load stock cursor when the network is available.</string>
     <string name="error_no_stocks">No stocks added! Hit the floating action button to add one.</string>
     <string name="toast_stock_added_no_connectivity">Symbol %s added. Will refresh when network available.</string>
-    <string name="toast_no_connectivity">Will refresh when network available.</string>
+    <string name="toast_no_connectivity">No internet connection. Refresh will not work.</string>
     <string name="toast_sync_error_try_again">Error while syncing stocks. Please, try again!</string>
     <string name="status_loading">Loading...</string>
     <string name="status_unknown_stock">Unknown Stock</string>

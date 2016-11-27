@@ -1,11 +1,11 @@
 package com.udacity.stockhawk.ui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +17,6 @@ import com.udacity.stockhawk.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
 
 public class AddStockDialog extends DialogFragment {
 
@@ -58,12 +57,12 @@ public class AddStockDialog extends DialogFragment {
     }
 
     private void addStock() {
-        Activity parent = getActivity();
-        if (parent instanceof MainActivity) {
-            ((MainActivity) parent).addStock(stock.getText().toString());
+        if (getTargetFragment() instanceof StockListFragment) {
+            Intent resultIntent = new Intent();
+            //TODO: Create constants
+            resultIntent.putExtra("stockName", stock.getText().toString());
+            getTargetFragment().onActivityResult(1, 1, resultIntent);
         }
         dismissAllowingStateLoss();
     }
-
-
 }

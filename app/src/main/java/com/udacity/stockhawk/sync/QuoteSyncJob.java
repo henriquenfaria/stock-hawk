@@ -56,9 +56,6 @@ public final class QuoteSyncJob {
 
                     // Stock is available/known and we should update it, otherwise skip it
                     if (!isUnknown) {
-
-
-
                         // TODO: Bulk query as before? Is it faster?
                         Stock stock = YahooFinance.get(symbol);
                         StockQuote quote = stock.getQuote();
@@ -116,6 +113,7 @@ public final class QuoteSyncJob {
         }
     }
 
+    //TODO: Min of 21 API? Find an alternative
     private static void schedulePeriodic(Context context) {
         Timber.d("Scheduling a periodic task");
 
@@ -132,12 +130,7 @@ public final class QuoteSyncJob {
         scheduler.schedule(builder.build());
     }
 
-
-    synchronized public static void initialize(final Context context) {
-        schedulePeriodic(context);
-        syncImmediately(context);
-    }
-
+    //TODO: Min of 21 API? Find an alternative
     synchronized public static void syncImmediately(Context context) {
         ConnectivityManager cm =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -158,5 +151,10 @@ public final class QuoteSyncJob {
 
             scheduler.schedule(builder.build());
         }
+    }
+
+    synchronized public static void initialize(final Context context) {
+        schedulePeriodic(context);
+        syncImmediately(context);
     }
 }
