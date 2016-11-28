@@ -8,10 +8,6 @@ import com.udacity.stockhawk.R;
 
 public final class Utils {
 
-    public static final int KNOWN_STOCK = 0;
-    public static final int UNKNOWN_STOCK = 1;
-
-    public static final String ACTION_SYNC_ERROR = "com.udacity.stockhawk.ACTION_SYNC_ERROR";
 
     private Utils() {
     }

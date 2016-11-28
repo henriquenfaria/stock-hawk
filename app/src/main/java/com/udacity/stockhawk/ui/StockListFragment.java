@@ -35,6 +35,7 @@ import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.listener.OnStockListFragmentListener;
 import com.udacity.stockhawk.sync.QuoteSyncJob;
+import com.udacity.stockhawk.utils.Constants;
 import com.udacity.stockhawk.utils.Utils;
 
 import butterknife.BindView;
@@ -49,7 +50,9 @@ public class StockListFragment extends Fragment implements LoaderManager
         SwipeRefreshLayout.OnRefreshListener,
         StockAdapter.StockAdapterOnClickHandler {
 
+    // Loader IDs
     private static final int STOCK_LOADER = 0;
+
     @BindView(R.id.recycler_view)
     RecyclerView mRecyclerView;
     @BindView(fab)
@@ -60,15 +63,9 @@ public class StockListFragment extends Fragment implements LoaderManager
     TextView mErrorTextView;
 
     private StockAdapter adapter;
-
     private final SyncErrorReceiver mReceiver = new SyncErrorReceiver();
-
-
-    // TODO: Use ButterKnife?
     private Context mContext;
-
     private OnStockListFragmentListener mOnStockListFragmentListener;
-
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -76,7 +73,6 @@ public class StockListFragment extends Fragment implements LoaderManager
      */
     public StockListFragment() {
     }
-
 
     // Create new Fragment instance
     public static StockListFragment newInstance() {
@@ -108,7 +104,8 @@ public class StockListFragment extends Fragment implements LoaderManager
         super.onResume();
         if (mReceiver != null) {
             LocalBroadcastManager.getInstance(mContext)
-                    .registerReceiver(mReceiver, new IntentFilter(Utils.ACTION_SYNC_ERROR));
+                    .registerReceiver(mReceiver, new IntentFilter(Constants.Action
+                            .ACTION_SYNC_ERROR));
         }
     }
 
@@ -131,7 +128,6 @@ public class StockListFragment extends Fragment implements LoaderManager
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.stock_list_fragment, container, false);
 
-        //TODO: Is it ok? What about mContext?
         ButterKnife.bind(this, view);
 
         firstRunCheck();
@@ -167,19 +163,18 @@ public class StockListFragment extends Fragment implements LoaderManager
 
         mAddButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //TODO: What about using mContext somehow?
                 AddStockDialog addStockDialog = new AddStockDialog();
 
                 // TODO: Create CODE and TAG in Constants
-                addStockDialog.setTargetFragment(StockListFragment.this, 1);
+                addStockDialog.setTargetFragment(StockListFragment.this,
+                        Constants.Request.REQUEST_STOCK_DIALOG);
                 addStockDialog.show(getActivity().getSupportFragmentManager(),
-                        "StockDialogFragment");
+                        StockListFragment.class.getSimpleName());
             }
         });
 
         return view;
     }
-
 
     private boolean networkUp() {
         ConnectivityManager cm =
@@ -230,9 +225,10 @@ public class StockListFragment extends Fragment implements LoaderManager
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        //TODO: Constants
-        if (requestCode == 1 && resultCode == 1 && data != null && data.hasExtra("stockName")) {
-            addStock(data.getStringExtra("stockName"));
+        if (requestCode == Constants.Request.REQUEST_STOCK_DIALOG
+                && resultCode == Constants.Result.RESULT_STOCK_DIALOG
+                && data != null && data.hasExtra(Constants.Extra.EXTRA_STOCK_NAME)) {
+            addStock(data.getStringExtra(Constants.Extra.EXTRA_STOCK_NAME));
         }
     }
 

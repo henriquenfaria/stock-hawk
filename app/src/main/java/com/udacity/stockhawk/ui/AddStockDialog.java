@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.udacity.stockhawk.R;
+import com.udacity.stockhawk.utils.Constants;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -59,9 +60,9 @@ public class AddStockDialog extends DialogFragment {
     private void addStock() {
         if (getTargetFragment() instanceof StockListFragment) {
             Intent resultIntent = new Intent();
-            //TODO: Create constants
-            resultIntent.putExtra("stockName", stock.getText().toString());
-            getTargetFragment().onActivityResult(1, 1, resultIntent);
+            resultIntent.putExtra(Constants.Extra.EXTRA_STOCK_NAME, stock.getText().toString());
+            getTargetFragment().onActivityResult(Constants.Request.REQUEST_STOCK_DIALOG,
+                    Constants.Result.RESULT_STOCK_DIALOG, resultIntent);
         }
         dismissAllowingStateLoss();
     }

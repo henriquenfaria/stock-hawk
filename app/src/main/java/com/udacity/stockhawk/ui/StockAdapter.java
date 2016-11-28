@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
+import com.udacity.stockhawk.utils.Constants;
 import com.udacity.stockhawk.utils.Utils;
 
 import java.text.DecimalFormat;
@@ -50,7 +51,7 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
 
     String getSymbolAtPosition(int position) {
         cursor.moveToPosition(position);
-        return cursor.getString(Contract.Quote.POSITION_SYMBOL);
+        return cursor.getString(cursor.getColumnIndex(Contract.Quote.COLUMN_SYMBOL));
     }
 
     @Override
@@ -64,27 +65,32 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
 
         cursor.moveToPosition(position);
 
-        holder.symbol.setText(cursor.getString(Contract.Quote.POSITION_SYMBOL));
+        holder.symbol.setText(cursor.getString(cursor.getColumnIndex(Contract.Quote
+                .COLUMN_SYMBOL)));
 
         // Stock quote was not loaded yet
-        if (cursor.isNull(Contract.Quote.POSITION_IS_UNKNOWN)) {
+        if (cursor.isNull(cursor.getColumnIndex(Contract.Quote.COLUMN_TYPE))) {
             holder.priceChangeLayout.setVisibility(View.GONE);
             holder.stockStatusLayout.setVisibility(View.VISIBLE);
             holder.stockStatusText.setText(R.string.status_loading);
-        // Stock is unknown
-        } else if (cursor.getInt(Contract.Quote.POSITION_IS_UNKNOWN) == Utils.UNKNOWN_STOCK) {
+            // Stock is unknown
+        } else if (cursor.getInt(cursor.getColumnIndex(Contract.Quote.COLUMN_TYPE)) ==
+                Constants.StockType.UNKNOWN) {
             holder.priceChangeLayout.setVisibility(View.GONE);
             holder.stockStatusLayout.setVisibility(View.VISIBLE);
             holder.stockStatusText.setText(R.string.status_unknown_stock);
-        // Stock is known and valid
+            // Stock is known and valid
         } else {
 
             holder.priceChangeLayout.setVisibility(View.VISIBLE);
             holder.stockStatusLayout.setVisibility(View.GONE);
-            holder.price.setText(dollarFormat.format(cursor.getFloat(Contract.Quote.POSITION_PRICE)));
+            holder.price.setText(dollarFormat.format(cursor.getFloat(cursor.getColumnIndex
+                    (Contract.Quote.COLUMN_PRICE))));
 
-            float rawAbsoluteChange = cursor.getFloat(Contract.Quote.POSITION_ABSOLUTE_CHANGE);
-            float percentageChange = cursor.getFloat(Contract.Quote.POSITION_PERCENTAGE_CHANGE);
+            float rawAbsoluteChange = cursor.getFloat(cursor.getColumnIndex(Contract.Quote
+                    .COLUMN_ABSOLUTE_CHANGE));
+            float percentageChange = cursor.getFloat(cursor.getColumnIndex(Contract.Quote
+                    .COLUMN_PERCENTAGE_CHANGE));
 
             if (rawAbsoluteChange > 0) {
                 holder.change.setBackgroundResource(R.drawable.percent_change_pill_green);
