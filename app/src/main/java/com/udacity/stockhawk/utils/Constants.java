@@ -15,7 +15,7 @@ public final class Constants {
     }
 
     public static class Extra {
-        public static final String EXTRA_STOCK_NAME = "extra_stock_name";
+        public static final String EXTRA_STOCK_SYMBOL = "extra_stock_symbol";
 
     }
 

@@ -22,6 +22,14 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.StockDetailActivity"
+            android:parentActivityName=".ui.StockListActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.StockListActivity"/>
+        </activity>
+
         <service
             android:name=".sync.QuoteIntentService"
             android:exported="false"/>

@@ -33,7 +33,6 @@ import android.widget.Toast;
 
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
-import com.udacity.stockhawk.listener.OnStockListFragmentListener;
 import com.udacity.stockhawk.sync.QuoteSyncJob;
 import com.udacity.stockhawk.utils.Constants;
 import com.udacity.stockhawk.utils.Utils;
@@ -83,6 +82,7 @@ public class StockListFragment extends Fragment implements LoaderManager
     @Override
     public void onClick(String symbol) {
         Timber.d("Symbol clicked: %s", symbol);
+        mOnStockListFragmentListener.onStockListFragmentListener(symbol);
     }
 
     @Override
@@ -227,8 +227,8 @@ public class StockListFragment extends Fragment implements LoaderManager
 
         if (requestCode == Constants.Request.REQUEST_STOCK_DIALOG
                 && resultCode == Constants.Result.RESULT_STOCK_DIALOG
-                && data != null && data.hasExtra(Constants.Extra.EXTRA_STOCK_NAME)) {
-            addStock(data.getStringExtra(Constants.Extra.EXTRA_STOCK_NAME));
+                && data != null && data.hasExtra(Constants.Extra.EXTRA_STOCK_SYMBOL)) {
+            addStock(data.getStringExtra(Constants.Extra.EXTRA_STOCK_SYMBOL));
         }
     }
 
@@ -343,6 +343,10 @@ public class StockListFragment extends Fragment implements LoaderManager
                         .show();
             }
         }
+    }
+
+    public interface OnStockListFragmentListener {
+        void onStockListFragmentListener(String symbol);
     }
 
 }
