@@ -1,8 +1,6 @@
 package com.udacity.stockhawk.sync;
 
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
-import android.content.ComponentName;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -11,9 +9,15 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.firebase.jobdispatcher.Constraint;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.RetryStrategy;
+import com.firebase.jobdispatcher.Trigger;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.utils.Constants;
-import com.udacity.stockhawk.utils.Utils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -29,10 +33,10 @@ import yahoofinance.quotes.stock.StockQuote;
 
 public final class QuoteSyncJob {
 
-    static final int ONE_OFF_ID = 2;
-    private static final int PERIOD = 300000;
-    private static final int INITIAL_BACKOFF = 10000;
-    private static final int PERIODIC_ID = 1;
+    private static final String JOB_TAG_ONE_OFF = "job_tag_one_off";
+    private static final String JOB_TAG_PERIODIC = "job_tag_periodic";
+    private static final int PERIOD = 30;
+
 
     static void getQuotes(Context context) {
 
@@ -118,25 +122,28 @@ public final class QuoteSyncJob {
         }
     }
 
-    //TODO: Min of 21 API? Find an alternative
     private static void schedulePeriodic(Context context) {
-        Timber.d("Scheduling a periodic task");
+        Timber.d("Scheduling a periodic sync every " + PERIOD + " seconds");
 
-        JobInfo.Builder builder = new JobInfo.Builder(PERIODIC_ID, new ComponentName(context,
-                QuoteJobService.class));
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(context));
 
-        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                .setPeriodic(PERIOD)
-                .setBackoffCriteria(INITIAL_BACKOFF, JobInfo.BACKOFF_POLICY_EXPONENTIAL);
+        Job myJob = dispatcher.newJobBuilder()
+                .setService(QuoteJobService.class)
+                .setTag(JOB_TAG_PERIODIC)
+                .setRecurring(true)
+                .setTrigger(Trigger.executionWindow(PERIOD, PERIOD))
+                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
+                .setConstraints(Constraint.ON_ANY_NETWORK)
+                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                .setReplaceCurrent(true)
+                .build();
 
-        JobScheduler scheduler = (JobScheduler) context.getSystemService(Context
-                .JOB_SCHEDULER_SERVICE);
-
-        scheduler.schedule(builder.build());
+        dispatcher.mustSchedule(myJob);
     }
 
-    //TODO: Min of 21 API? Find an alternative
     synchronized public static void syncImmediately(Context context) {
+        Timber.d("Scheduling a immediate sync");
+
         ConnectivityManager cm =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
@@ -145,16 +152,20 @@ public final class QuoteSyncJob {
             context.startService(nowIntent);
         } else {
 
-            JobInfo.Builder builder = new JobInfo.Builder(ONE_OFF_ID, new ComponentName(context,
-                    QuoteJobService.class));
+            FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver
+                    (context));
 
-            builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                    .setBackoffCriteria(INITIAL_BACKOFF, JobInfo.BACKOFF_POLICY_EXPONENTIAL);
+            Job myJob = dispatcher.newJobBuilder()
+                    .setService(QuoteJobService.class)
+                    .setTag(JOB_TAG_ONE_OFF)
+                    .setRecurring(false)
+                    .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
+                    .setConstraints(Constraint.ON_ANY_NETWORK)
+                    .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                    .setReplaceCurrent(true)
+                    .build();
 
-            JobScheduler scheduler = (JobScheduler) context.getSystemService(Context
-                    .JOB_SCHEDULER_SERVICE);
-
-            scheduler.schedule(builder.build());
+            dispatcher.mustSchedule(myJob);
         }
     }
 
