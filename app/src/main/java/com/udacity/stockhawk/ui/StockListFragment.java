@@ -137,6 +137,7 @@ public class StockListFragment extends Fragment implements LoaderManager
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
 
         mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout.setRefreshing(true);
         onRefresh();
 
         QuoteSyncJob.initialize(mContext);
