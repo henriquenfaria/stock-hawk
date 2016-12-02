@@ -76,6 +76,7 @@ public class StockDetailFragment extends Fragment {
         if (getArguments() != null) {
             mStockSymbol = getArguments().getString(ARG_STOCK_SYMBOL);
         }
+        getActivity().setTitle(mStockSymbol);
     }
 
 

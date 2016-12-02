@@ -100,6 +100,18 @@ public class StockListFragment extends Fragment implements LoaderManager
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        QuoteSyncJob.initializeSyncJob(mContext);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        QuoteSyncJob.stopSyncJob(mContext);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         if (mReceiver != null) {
@@ -131,16 +143,11 @@ public class StockListFragment extends Fragment implements LoaderManager
         ButterKnife.bind(this, view);
 
         firstRunCheck();
-
         adapter = new StockAdapter(mContext, this);
         mRecyclerView.setAdapter(adapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-
         mSwipeRefreshLayout.setOnRefreshListener(this);
-        mSwipeRefreshLayout.setRefreshing(true);
         onRefresh();
-
-        QuoteSyncJob.initialize(mContext);
         //TODO: What about using mContext somehow?
         getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
 

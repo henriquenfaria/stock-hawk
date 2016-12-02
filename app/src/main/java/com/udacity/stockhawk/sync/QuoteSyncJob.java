@@ -169,8 +169,16 @@ public final class QuoteSyncJob {
         }
     }
 
-    synchronized public static void initialize(final Context context) {
+    synchronized public static void initializeSyncJob(final Context context) {
         schedulePeriodic(context);
         syncImmediately(context);
+    }
+
+    synchronized public static void stopSyncJob(final Context context) {
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver
+                (context));
+
+        dispatcher.cancel(JOB_TAG_ONE_OFF);
+        dispatcher.cancel(JOB_TAG_PERIODIC);
     }
 }
