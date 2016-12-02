@@ -26,5 +26,6 @@
     <string name="toast_sync_error_try_again">Error while syncing stocks. Please, try again!</string>
     <string name="status_loading">Loading...</string>
     <string name="status_unknown_stock">Unknown Stock</string>
-    <string name="chart_no_data">No data</string>
+    <string name="loading_chart_data">Loading chart data</string>
+
 </resources>

@@ -62,7 +62,7 @@ public class StockListFragment extends Fragment implements LoaderManager
     TextView mErrorTextView;
 
     private StockAdapter adapter;
-    private final SyncErrorReceiver mReceiver = new SyncErrorReceiver();
+    private final SyncErrorReceiver mSyncErrorReceiver = new SyncErrorReceiver();
     private Context mContext;
     private OnStockListFragmentListener mOnStockListFragmentListener;
 
@@ -114,9 +114,9 @@ public class StockListFragment extends Fragment implements LoaderManager
     @Override
     public void onResume() {
         super.onResume();
-        if (mReceiver != null) {
+        if (mSyncErrorReceiver != null) {
             LocalBroadcastManager.getInstance(mContext)
-                    .registerReceiver(mReceiver, new IntentFilter(Constants.Action
+                    .registerReceiver(mSyncErrorReceiver, new IntentFilter(Constants.Action
                             .ACTION_SYNC_ERROR));
         }
     }
@@ -124,8 +124,8 @@ public class StockListFragment extends Fragment implements LoaderManager
     @Override
     public void onPause() {
         super.onPause();
-        if (mReceiver != null) {
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mReceiver);
+        if (mSyncErrorReceiver != null) {
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mSyncErrorReceiver);
         }
     }
 
@@ -171,8 +171,6 @@ public class StockListFragment extends Fragment implements LoaderManager
         mAddButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 AddStockDialog addStockDialog = new AddStockDialog();
-
-                // TODO: Create CODE and TAG in Constants
                 addStockDialog.setTargetFragment(StockListFragment.this,
                         Constants.Request.REQUEST_STOCK_DIALOG);
                 addStockDialog.show(getActivity().getSupportFragmentManager(),
@@ -340,20 +338,22 @@ public class StockListFragment extends Fragment implements LoaderManager
     }
 
 
-    private class SyncErrorReceiver extends BroadcastReceiver {
+    public interface OnStockListFragmentListener {
+        void onStockListFragmentListener(String symbol);
+    }
+
+
+    public class SyncErrorReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null) {
                 //TODO: Call this method from the Fragment?
-                //swipeRefreshLayout.setRefreshing(false);
+                if (mSwipeRefreshLayout != null) {
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
                 Toast.makeText(context, R.string.toast_sync_error_try_again, Toast.LENGTH_LONG)
                         .show();
             }
         }
     }
-
-    public interface OnStockListFragmentListener {
-        void onStockListFragmentListener(String symbol);
-    }
-
 }

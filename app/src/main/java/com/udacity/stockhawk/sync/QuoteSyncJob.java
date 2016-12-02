@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.firebase.jobdispatcher.Constraint;
@@ -16,17 +17,20 @@ import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.RetryStrategy;
 import com.firebase.jobdispatcher.Trigger;
+import com.github.mikephil.charting.data.Entry;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.utils.Constants;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 import timber.log.Timber;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
+import yahoofinance.histquotes.HistQuotesRequest;
 import yahoofinance.histquotes.HistoricalQuote;
 import yahoofinance.histquotes.Interval;
 import yahoofinance.quotes.stock.StockQuote;
@@ -35,6 +39,7 @@ public final class QuoteSyncJob {
 
     private static final String JOB_TAG_ONE_OFF = "job_tag_one_off";
     private static final String JOB_TAG_PERIODIC = "job_tag_periodic";
+    private static final String JOB_TAG_ONE_OFF_HISTORY = "job_tag_one_off_history";
     private static final int PERIOD = 30;
 
 
@@ -122,6 +127,60 @@ public final class QuoteSyncJob {
         }
     }
 
+    static void getHistQuotes(Context context, String stockSymbol) {
+
+        Timber.d("Running hist sync job");
+
+        // TODO: Make logic to change the HistQuotesRequest parameters.
+        // Intervals: Yearly, montly, weekly
+        // Timespan: 1 year, 2 years, 3 years
+        Calendar from = Calendar.getInstance();
+        from.add(Calendar.YEAR, -1);
+        Calendar to = Calendar.getInstance();
+
+        HistQuotesRequest histQuotesRequest = new HistQuotesRequest(stockSymbol, from, to,
+                Interval.MONTHLY);
+
+        try {
+            List<HistoricalQuote> histQuoteList = histQuotesRequest.getResult();
+
+            Intent broadcastIntent = new Intent();
+            broadcastIntent.setAction(Constants.Action.ACTION_HIST_SYNC_RESULT);
+
+            ArrayList<Entry> entries = new ArrayList();
+
+            if (histQuoteList != null) {
+                for (HistoricalQuote histQuote : histQuoteList) {
+                    entries.add(new Entry(histQuote.getDate().get(Calendar.MONTH),
+                            histQuote.getClose().floatValue()));
+                }
+            }
+            broadcastIntent.putParcelableArrayListExtra(Constants.Extra.EXTRA_HIST_QUOTE_LIST,
+                    entries);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
+
+        } catch (IOException exception) {
+            Timber.e(exception, "Error fetching stock quotes");
+            Intent broadcastIntent = new Intent();
+            broadcastIntent.setAction(Constants.Action.ACTION_SYNC_ERROR);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
+        }
+
+        //List<HistoricalQuote>
+
+
+       /* try {
+            List<HistoricalQuote> histQuoteList = histQuotesRequest.getResult();
+            generateStockChart(histQuoteList);
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        }*/
+
+
+    }
+
+
     private static void schedulePeriodic(Context context) {
         Timber.d("Scheduling a periodic sync every " + PERIOD + " seconds");
 
@@ -144,29 +203,50 @@ public final class QuoteSyncJob {
     synchronized public static void syncImmediately(Context context) {
         Timber.d("Scheduling a immediate sync");
 
-        ConnectivityManager cm =
-                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnectedOrConnecting()) {
-            Intent nowIntent = new Intent(context, QuoteIntentService.class);
-            context.startService(nowIntent);
-        } else {
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver
+                (context));
 
-            FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver
-                    (context));
+        Bundle bundle = new Bundle();
+        bundle.putInt(Constants.Extra.EXTRA_JOB_TYPE, Constants.JobType.NORMAL);
 
-            Job myJob = dispatcher.newJobBuilder()
-                    .setService(QuoteJobService.class)
-                    .setTag(JOB_TAG_ONE_OFF)
-                    .setRecurring(false)
-                    .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
-                    .setConstraints(Constraint.ON_ANY_NETWORK)
-                    .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
-                    .setReplaceCurrent(true)
-                    .build();
+        Job myJob = dispatcher.newJobBuilder()
+                .setService(QuoteJobService.class)
+                .setTag(JOB_TAG_ONE_OFF)
+                .setExtras(bundle)
+                .setRecurring(false)
+                .setTrigger(Trigger.executionWindow(0, 0))
+                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
+                .setConstraints(Constraint.ON_ANY_NETWORK)
+                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                .setReplaceCurrent(true)
+                .build();
 
-            dispatcher.mustSchedule(myJob);
-        }
+        dispatcher.mustSchedule(myJob);
+
+    }
+
+    synchronized public static void syncHistoryImmediately(Context context, String symbol) {
+        Timber.d("Scheduling a history immediate sync");
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver
+                (context));
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(Constants.Extra.EXTRA_JOB_TYPE, Constants.JobType.HISTORY);
+        bundle.putString(Constants.Extra.EXTRA_STOCK_SYMBOL, symbol);
+
+        Job myJob = dispatcher.newJobBuilder()
+                .setService(QuoteJobService.class)
+                .setTag(JOB_TAG_ONE_OFF_HISTORY)
+                .setExtras(bundle)
+                .setRecurring(false)
+                .setTrigger(Trigger.executionWindow(0, 0))
+                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
+                .setConstraints(Constraint.ON_ANY_NETWORK)
+                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                .setReplaceCurrent(true)
+                .build();
+
+        dispatcher.mustSchedule(myJob);
     }
 
     synchronized public static void initializeSyncJob(final Context context) {
@@ -180,5 +260,12 @@ public final class QuoteSyncJob {
 
         dispatcher.cancel(JOB_TAG_ONE_OFF);
         dispatcher.cancel(JOB_TAG_PERIODIC);
+    }
+
+    synchronized public static void stopHistSyncJob(final Context context) {
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver
+                (context));
+
+        dispatcher.cancel(JOB_TAG_ONE_OFF_HISTORY);
     }
 }

@@ -1,13 +1,18 @@
 package com.udacity.stockhawk.ui;
 
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
@@ -21,12 +26,15 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.utils.EntryXComparator;
 import com.udacity.stockhawk.R;
 
-import java.util.ArrayList;
+import com.udacity.stockhawk.sync.QuoteSyncJob;
+import com.udacity.stockhawk.utils.Constants;
+
 import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
 
 public class StockDetailFragment extends Fragment {
 
@@ -34,6 +42,8 @@ public class StockDetailFragment extends Fragment {
     private String mStockSymbol;
     private OnStockDetailFragmentListener mOnStockDetailFragmentListener;
     private Context mContext;
+    private final SyncErrorReceiver mSyncErrorReceiver = new SyncErrorReceiver();
+    private final HistSyncReceiver mHistSyncReceiver = new HistSyncReceiver();
 
     @BindView(R.id.stock_chart)
     LineChart mLineChart;
@@ -52,6 +62,38 @@ public class StockDetailFragment extends Fragment {
         args.putString(ARG_STOCK_SYMBOL, stockSymbol);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mSyncErrorReceiver != null) {
+            LocalBroadcastManager.getInstance(mContext)
+                    .registerReceiver(mSyncErrorReceiver, new IntentFilter(Constants.Action
+                            .ACTION_SYNC_ERROR));
+        }
+        if (mHistSyncReceiver != null) {
+            LocalBroadcastManager.getInstance(mContext)
+                    .registerReceiver(mHistSyncReceiver, new IntentFilter(Constants.Action
+                            .ACTION_HIST_SYNC_RESULT));
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mSyncErrorReceiver != null) {
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mSyncErrorReceiver);
+        }
+        if (mHistSyncReceiver != null) {
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mHistSyncReceiver);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        QuoteSyncJob.stopHistSyncJob(mContext);
     }
 
     @Override
@@ -86,33 +128,13 @@ public class StockDetailFragment extends Fragment {
         View view = inflater.inflate(R.layout.stock_detail_fragment, container, false);
         ButterKnife.bind(this, view);
 
-        generateStockChart();
+        QuoteSyncJob.syncHistoryImmediately(mContext, mStockSymbol);
 
         return view;
     }
 
-    private void generateStockChart() {
 
-        // TODO: Placeholder values for testing
-        List<Entry> entries = new ArrayList();
-        /*for (int i = 0; i < 20; i++) {
-            entries.add(new Entry(i,i));
-        }*/
-        entries.add(new Entry(1998, 10));
-        entries.add(new Entry(1999, 15));
-        entries.add(new Entry(2000, 14));
-        entries.add(new Entry(2001, 1));
-        entries.add(new Entry(2002, 2));
-        entries.add(new Entry(2003, 6));
-        entries.add(new Entry(2004, 23));
-        entries.add(new Entry(2005, 26));
-        entries.add(new Entry(2006, 26));
-        entries.add(new Entry(2007, 26));
-        entries.add(new Entry(2008, 20));
-
-
-        // Entries need to be added to a DataSet sorted by their x-position
-        // https://github.com/PhilJay/MPAndroidChart/issues/2074
+    private void generateStockChart(List<Entry> entries) {
         Collections.sort(entries, new EntryXComparator());
 
         LineDataSet dataSet = new LineDataSet(entries, null);
@@ -143,7 +165,7 @@ public class StockDetailFragment extends Fragment {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
                 String formattedValue = String.format("%.0f", value);
-                return "$" +formattedValue;
+                return "$" + formattedValue;
             }
         });
 
@@ -162,9 +184,36 @@ public class StockDetailFragment extends Fragment {
         mLineChart.setDrawMarkers(true);
         mLineChart.setMarker(new StockMarkerView(mContext, R.layout.stock_marker_layout));
         mLineChart.setDescription(null);
+        mLineChart.setNoDataText(getString(R.string.loading_chart_data));
         mLineChart.invalidate();
     }
 
     public interface OnStockDetailFragmentListener {
+    }
+
+    private class HistSyncReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null && intent.hasExtra(Constants.Extra.EXTRA_HIST_QUOTE_LIST)) {
+
+                List<Entry> entries = intent.getParcelableArrayListExtra(Constants.Extra
+                        .EXTRA_HIST_QUOTE_LIST);
+
+                if (mLineChart != null && entries != null) {
+                    generateStockChart(entries);
+                }
+
+            }
+        }
+    }
+
+    public class SyncErrorReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null) {
+                Toast.makeText(context, R.string.toast_sync_error_try_again, Toast.LENGTH_LONG)
+                        .show();
+            }
+        }
     }
 }
