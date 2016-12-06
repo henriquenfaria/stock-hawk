@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
@@ -25,7 +26,6 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.utils.EntryXComparator;
 import com.udacity.stockhawk.R;
-
 import com.udacity.stockhawk.sync.QuoteSyncJob;
 import com.udacity.stockhawk.utils.Constants;
 
@@ -130,6 +130,8 @@ public class StockDetailFragment extends Fragment {
 
         QuoteSyncJob.syncHistoryImmediately(mContext, mStockSymbol);
 
+        mLineChart.setNoDataText(getString(R.string.status_loading_chart_data));
+
         return view;
     }
 
@@ -184,8 +186,7 @@ public class StockDetailFragment extends Fragment {
         mLineChart.setDrawMarkers(true);
         mLineChart.setMarker(new StockMarkerView(mContext, R.layout.stock_marker_layout));
         mLineChart.setDescription(null);
-        mLineChart.setNoDataText(getString(R.string.loading_chart_data));
-        mLineChart.invalidate();
+        mLineChart.animateX(Constants.Chart.CHART_X_ANIMATION_TIME, Easing.EasingOption.EaseInOutBack);
     }
 
     public interface OnStockDetailFragmentListener {

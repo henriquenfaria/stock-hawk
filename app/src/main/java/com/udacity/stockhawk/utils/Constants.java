@@ -36,5 +36,9 @@ public final class Constants {
         public static final int RESULT_STOCK_DIALOG = 0;
 
     }
+
+    public static class Chart {
+        public static final int CHART_X_ANIMATION_TIME = 2000;
+    }
 }
 
