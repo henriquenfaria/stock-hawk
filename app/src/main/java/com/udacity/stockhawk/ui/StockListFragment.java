@@ -81,9 +81,9 @@ public class StockListFragment extends Fragment implements LoaderManager
     }
 
     @Override
-    public void onClick(String symbol) {
-        Timber.d("Symbol clicked: %s", symbol);
-        mOnStockListFragmentListener.onStockListFragmentListener(symbol);
+    public void onClick(String symbol, int type) {
+        Timber.d("Symbol clicked: %s with type %d", symbol, type);
+        mOnStockListFragmentListener.onStockListFragmentListener(symbol, type);
     }
 
     @Override
@@ -226,6 +226,7 @@ public class StockListFragment extends Fragment implements LoaderManager
 
             ContentValues quoteCV = new ContentValues();
             quoteCV.put(Contract.Quote.COLUMN_SYMBOL, symbol);
+            quoteCV.put(Contract.Quote.COLUMN_TYPE, Constants.StockType.LOADING);
             mContext.getContentResolver().insert(Contract.Quote.uri, quoteCV);
             QuoteSyncJob.syncImmediately(mContext);
         }
@@ -333,6 +334,7 @@ public class StockListFragment extends Fragment implements LoaderManager
             for (int i = 0; i < defaultStocks.length; i++) {
                 ContentValues quoteCV = new ContentValues();
                 quoteCV.put(Contract.Quote.COLUMN_SYMBOL, defaultStocks[i]);
+                quoteCV.put(Contract.Quote.COLUMN_TYPE, Constants.StockType.LOADING);
                 mContext.getContentResolver().insert(Contract.Quote.uri, quoteCV);
             }
 
@@ -346,7 +348,7 @@ public class StockListFragment extends Fragment implements LoaderManager
 
 
     public interface OnStockListFragmentListener {
-        void onStockListFragmentListener(String symbol);
+        void onStockListFragmentListener(String symbol, int type);
     }
 
 

@@ -4,24 +4,28 @@ public final class Constants {
 
 
     public static class StockType {
-        public static final int KNOWN = 0;
+        public static final int LOADING = 0;
         public static final int UNKNOWN = 1;
+        public static final int KNOWN = 2;
+
     }
 
     public static class JobType {
-        public static final int INVALID = -1;
-        public static final int NORMAL = 0;
-        public static final int HISTORY = 1;
+        public static final int INVALID = 0;
+        public static final int NORMAL = 1;
+        public static final int HISTORY = 2;
     }
 
     public static class SyncResultType {
-        public static final int RESULT_UNKNOWN = -1;
+        public static final int RESULT_UNKNOWN = 0;
         public static final int RESULT_SUCCESS = 1;
         public static final int RESULT_ERROR = 2;
     }
 
     public static class Action {
         public static final String ACTION_SYNC_END = "com.udacity.stockhawk.ACTION_SYNC_END";
+        public static final String ACTION_HIST_SYNC_END =
+                "com.udacity.stockhawk.ACTION_HIST_SYNC_END";
     }
 
     public static class Extra {

@@ -61,10 +61,8 @@ public final class QuoteSyncJob {
                     String symbol = cursor.getString(cursor.getColumnIndex(Contract.Quote
                             .COLUMN_SYMBOL));
 
-                    boolean isUnknown = !cursor.isNull(cursor.getColumnIndex(Contract.Quote
-                            .COLUMN_TYPE))
-                            && cursor.getInt(cursor.getColumnIndex(Contract.Quote
-                            .COLUMN_TYPE)) == Constants.StockType.UNKNOWN;
+                    boolean isUnknown = cursor.getInt(cursor.getColumnIndex
+                            (Contract.Quote.COLUMN_TYPE)) == Constants.StockType.UNKNOWN;
 
                     // Stock is available/known and we should update it, otherwise skip it
                     if (!isUnknown) {
@@ -99,16 +97,14 @@ public final class QuoteSyncJob {
                                 historyBuilder.append(it.getClose());
                                 historyBuilder.append("\n");
                             }
-
+                            quoteCV.put(Contract.Quote.COLUMN_TYPE, Constants.StockType
+                                    .KNOWN);
                             quoteCV.put(Contract.Quote.COLUMN_PRICE, price.floatValue());
                             quoteCV.put(Contract.Quote.COLUMN_PERCENTAGE_CHANGE, change
                                     .floatValue());
                             quoteCV.put(Contract.Quote.COLUMN_ABSOLUTE_CHANGE, percentChange
                                     .floatValue());
                             quoteCV.put(Contract.Quote.COLUMN_HISTORY, historyBuilder.toString());
-                            quoteCV.put(Contract.Quote.COLUMN_TYPE, Constants.StockType
-                                    .KNOWN);
-
                         }
                         context.getContentResolver().update(Contract.Quote.uri, quoteCV,
                                 Contract.Quote.COLUMN_SYMBOL + "=?", new String[]{symbol});
@@ -152,7 +148,7 @@ public final class QuoteSyncJob {
             List<HistoricalQuote> histQuoteList = histQuotesRequest.getResult();
 
             Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction(Constants.Action.ACTION_SYNC_END);
+            broadcastIntent.setAction(Constants.Action.ACTION_HIST_SYNC_END);
             broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
                     Constants.SyncResultType.RESULT_SUCCESS);
             ArrayList<Entry> entries = new ArrayList();
@@ -170,7 +166,7 @@ public final class QuoteSyncJob {
         } catch (IOException exception) {
             Timber.e(exception, "Error fetching stock quotes");
             Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction(Constants.Action.ACTION_SYNC_END);
+            broadcastIntent.setAction(Constants.Action.ACTION_HIST_SYNC_END);
             broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
                     Constants.SyncResultType.RESULT_ERROR);
             LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);

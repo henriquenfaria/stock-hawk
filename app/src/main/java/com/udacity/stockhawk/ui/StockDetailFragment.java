@@ -43,7 +43,7 @@ public class StockDetailFragment extends Fragment {
     private String mStockSymbol;
     private OnStockDetailFragmentListener mOnStockDetailFragmentListener;
     private Context mContext;
-    private final SyncEndReceiver mSyncEndReceiver = new SyncEndReceiver();
+    private final HistSyncEndReceiver mHistSyncEndReceiver = new HistSyncEndReceiver();
 
     @BindView(R.id.stock_chart)
     LineChart mLineChart;
@@ -67,18 +67,18 @@ public class StockDetailFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (mSyncEndReceiver != null) {
+        if (mHistSyncEndReceiver != null) {
             LocalBroadcastManager.getInstance(mContext)
-                    .registerReceiver(mSyncEndReceiver, new IntentFilter(Constants.Action
-                            .ACTION_SYNC_END));
+                    .registerReceiver(mHistSyncEndReceiver, new IntentFilter(Constants.Action
+                            .ACTION_HIST_SYNC_END));
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (mSyncEndReceiver != null) {
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mSyncEndReceiver);
+        if (mHistSyncEndReceiver != null) {
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mHistSyncEndReceiver);
         }
     }
 
@@ -185,23 +185,22 @@ public class StockDetailFragment extends Fragment {
     public interface OnStockDetailFragmentListener {
     }
 
-    public class SyncEndReceiver extends BroadcastReceiver {
+    public class HistSyncEndReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null) {
-                if (TextUtils.equals(intent.getAction(), Constants.Action.ACTION_SYNC_END) &&
+                if (TextUtils.equals(intent.getAction(), Constants.Action.ACTION_HIST_SYNC_END) &&
                         (intent.hasExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE))) {
-
 
                     int resultType = intent.getIntExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
                             Constants.SyncResultType.RESULT_UNKNOWN);
 
                     switch (resultType) {
                         case Constants.SyncResultType.RESULT_SUCCESS:
-
                             if (intent.hasExtra(Constants.Extra.EXTRA_HIST_QUOTE_LIST)) {
-                                List<Entry> entries = intent.getParcelableArrayListExtra(Constants.Extra
+                                List<Entry> entries = intent.getParcelableArrayListExtra
+                                        (Constants.Extra
                                         .EXTRA_HIST_QUOTE_LIST);
 
                                 if (mLineChart != null && entries != null) {

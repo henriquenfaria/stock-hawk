@@ -20,20 +20,21 @@ public class Contract {
         public static final String TABLE_NAME = "quotes";
 
         public static final String COLUMN_SYMBOL = "symbol";
+        public static final String COLUMN_TYPE = "type";
         public static final String COLUMN_PRICE = "price";
         public static final String COLUMN_ABSOLUTE_CHANGE = "absolute_change";
         public static final String COLUMN_PERCENTAGE_CHANGE = "percentage_change";
         public static final String COLUMN_HISTORY = "history";
-        public static final String COLUMN_TYPE = "type";
 
         public static final String[] QUOTE_COLUMNS = {
                 _ID,
                 COLUMN_SYMBOL,
+                COLUMN_TYPE,
                 COLUMN_PRICE,
                 COLUMN_ABSOLUTE_CHANGE,
                 COLUMN_PERCENTAGE_CHANGE,
-                COLUMN_HISTORY,
-                COLUMN_TYPE
+                COLUMN_HISTORY
+
         };
 
         public static Uri makeUriForStock(String symbol) {

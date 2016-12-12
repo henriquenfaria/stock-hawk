@@ -23,11 +23,11 @@ public class DbHelper extends SQLiteOpenHelper {
         String builder = "CREATE TABLE " + Quote.TABLE_NAME + " (" +
                 Quote._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 Quote.COLUMN_SYMBOL + " TEXT NOT NULL, " +
+                Quote.COLUMN_TYPE + " INTEGER NOT NULL, " +
                 Quote.COLUMN_PRICE + " REAL, " +
                 Quote.COLUMN_ABSOLUTE_CHANGE + " REAL, " +
                 Quote.COLUMN_PERCENTAGE_CHANGE + " REAL, " +
                 Quote.COLUMN_HISTORY + " TEXT, " +
-                Quote.COLUMN_TYPE + " INTEGER, " +
                 "UNIQUE (" + Quote.COLUMN_SYMBOL + ") ON CONFLICT REPLACE);";
 
         db.execSQL(builder);
