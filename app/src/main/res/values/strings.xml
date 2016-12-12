@@ -8,7 +8,7 @@
     <string name="pref_stocks_initialized_key" translatable="false">initialized</string>
     <string name="pref_stocks_key" translatable="false">stocks</string>
     <string name="pref_display_mode_key" translatable="false">displayMode</string>
-    <string name="pref_display_mode_default" translatable="false" >@string/pref_display_mode_percentage_key</string>
+    <string name="pref_display_mode_default" translatable="false">@string/pref_display_mode_percentage_key</string>
     <string name="pref_display_mode_absolute_key" translatable="false">absolute</string>
     <string name="pref_display_mode_percentage_key" translatable="false">percentage</string>
     <string name="pref_version_code" translatable="false">versionCode</string>
@@ -19,11 +19,13 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_add">Add</string>
     <string name="error_stock_not_found">Symbol %s is invalid!</string>
-    <string name="error_no_network">No network connectivity! Will load stock cursor when the network is available.</string>
+    <string name="error_no_stocks_no_connectivity">No stocks added! Connect to the internet and add a new stock.</string>
     <string name="error_no_stocks">No stocks added! Hit the floating action button to add one.</string>
     <string name="toast_stock_added_no_connectivity">Symbol %s added. Will refresh when network available.</string>
-    <string name="toast_no_connectivity">No internet connection. Refresh will not work.</string>
+    <string name="toast_no_connectivity">No internet connection. Unable to fetch stocks info.</string>
+    <string name="toast_no_please_check_connectivity">Please, check your internet connection.</string>
     <string name="toast_sync_error_try_again">Error while syncing stocks. Please, try again!</string>
+    <string name="toast_sync_success">Successfully synced</string>
     <string name="status_loading">Loading...</string>
     <string name="status_unknown_stock">Unknown Stock</string>
     <string name="status_loading_chart_data">Loading chart data...</string>

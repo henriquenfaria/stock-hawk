@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,8 +43,7 @@ public class StockDetailFragment extends Fragment {
     private String mStockSymbol;
     private OnStockDetailFragmentListener mOnStockDetailFragmentListener;
     private Context mContext;
-    private final SyncErrorReceiver mSyncErrorReceiver = new SyncErrorReceiver();
-    private final HistSyncReceiver mHistSyncReceiver = new HistSyncReceiver();
+    private final SyncEndReceiver mSyncEndReceiver = new SyncEndReceiver();
 
     @BindView(R.id.stock_chart)
     LineChart mLineChart;
@@ -67,26 +67,18 @@ public class StockDetailFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (mSyncErrorReceiver != null) {
+        if (mSyncEndReceiver != null) {
             LocalBroadcastManager.getInstance(mContext)
-                    .registerReceiver(mSyncErrorReceiver, new IntentFilter(Constants.Action
-                            .ACTION_SYNC_ERROR));
-        }
-        if (mHistSyncReceiver != null) {
-            LocalBroadcastManager.getInstance(mContext)
-                    .registerReceiver(mHistSyncReceiver, new IntentFilter(Constants.Action
-                            .ACTION_HIST_SYNC_RESULT));
+                    .registerReceiver(mSyncEndReceiver, new IntentFilter(Constants.Action
+                            .ACTION_SYNC_END));
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (mSyncErrorReceiver != null) {
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mSyncErrorReceiver);
-        }
-        if (mHistSyncReceiver != null) {
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mHistSyncReceiver);
+        if (mSyncEndReceiver != null) {
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mSyncEndReceiver);
         }
     }
 
@@ -186,34 +178,49 @@ public class StockDetailFragment extends Fragment {
         mLineChart.setDrawMarkers(true);
         mLineChart.setMarker(new StockMarkerView(mContext, R.layout.stock_marker_layout));
         mLineChart.setDescription(null);
-        mLineChart.animateX(Constants.Chart.CHART_X_ANIMATION_TIME, Easing.EasingOption.EaseInOutBack);
+        mLineChart.animateX(Constants.Chart.CHART_X_ANIMATION_TIME, Easing.EasingOption
+                .EaseInOutBack);
     }
 
     public interface OnStockDetailFragmentListener {
     }
 
-    private class HistSyncReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent != null && intent.hasExtra(Constants.Extra.EXTRA_HIST_QUOTE_LIST)) {
+    public class SyncEndReceiver extends BroadcastReceiver {
 
-                List<Entry> entries = intent.getParcelableArrayListExtra(Constants.Extra
-                        .EXTRA_HIST_QUOTE_LIST);
-
-                if (mLineChart != null && entries != null) {
-                    generateStockChart(entries);
-                }
-
-            }
-        }
-    }
-
-    public class SyncErrorReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null) {
-                Toast.makeText(context, R.string.toast_sync_error_try_again, Toast.LENGTH_LONG)
-                        .show();
+                if (TextUtils.equals(intent.getAction(), Constants.Action.ACTION_SYNC_END) &&
+                        (intent.hasExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE))) {
+
+
+                    int resultType = intent.getIntExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
+                            Constants.SyncResultType.RESULT_UNKNOWN);
+
+                    switch (resultType) {
+                        case Constants.SyncResultType.RESULT_SUCCESS:
+
+                            if (intent.hasExtra(Constants.Extra.EXTRA_HIST_QUOTE_LIST)) {
+                                List<Entry> entries = intent.getParcelableArrayListExtra(Constants.Extra
+                                        .EXTRA_HIST_QUOTE_LIST);
+
+                                if (mLineChart != null && entries != null) {
+                                    generateStockChart(entries);
+                                }
+                            } else {
+                                Toast.makeText(context, R.string.toast_sync_error_try_again, Toast
+                                        .LENGTH_LONG).show();
+                            }
+                            break;
+                        case Constants.SyncResultType.RESULT_ERROR:
+                            Toast.makeText(context, R.string.toast_sync_error_try_again, Toast
+                                    .LENGTH_LONG).show();
+                            break;
+                        default:
+                            break;
+
+                    }
+                }
             }
         }
     }

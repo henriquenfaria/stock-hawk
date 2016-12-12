@@ -34,8 +34,6 @@ public class QuoteIntentService extends IntentService {
                     Timber.d("Invalid JOB_TYPE extra. Do not execute job!");
                     break;
             }
-
-
         } else {
             Timber.d("There is no JOB_TYPE extra. Do not execute job!");
         }

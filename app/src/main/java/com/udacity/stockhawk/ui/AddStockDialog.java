@@ -61,8 +61,8 @@ public class AddStockDialog extends DialogFragment {
         if (getTargetFragment() instanceof StockListFragment) {
             Intent resultIntent = new Intent();
             resultIntent.putExtra(Constants.Extra.EXTRA_STOCK_SYMBOL, stock.getText().toString());
-            getTargetFragment().onActivityResult(Constants.Request.REQUEST_STOCK_DIALOG,
-                    Constants.Result.RESULT_STOCK_DIALOG, resultIntent);
+            getTargetFragment().onActivityResult(Constants.Dialog.STOCK_DIALOG,
+                    Constants.Dialog.STOCK_DIALOG, resultIntent);
         }
         dismissAllowingStateLoss();
     }

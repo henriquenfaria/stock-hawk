@@ -115,10 +115,17 @@ public final class QuoteSyncJob {
                     }
                 }
             }
+            Intent broadcastIntent = new Intent();
+            broadcastIntent.setAction(Constants.Action.ACTION_SYNC_END);
+            broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
+                    Constants.SyncResultType.RESULT_SUCCESS);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
         } catch (IOException exception) {
             Timber.e(exception, "Error fetching stock quotes");
             Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction(Constants.Action.ACTION_SYNC_ERROR);
+            broadcastIntent.setAction(Constants.Action.ACTION_SYNC_END);
+            broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
+                    Constants.SyncResultType.RESULT_ERROR);
             LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
         } finally {
             if (cursor != null) {
@@ -145,8 +152,9 @@ public final class QuoteSyncJob {
             List<HistoricalQuote> histQuoteList = histQuotesRequest.getResult();
 
             Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction(Constants.Action.ACTION_HIST_SYNC_RESULT);
-
+            broadcastIntent.setAction(Constants.Action.ACTION_SYNC_END);
+            broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
+                    Constants.SyncResultType.RESULT_SUCCESS);
             ArrayList<Entry> entries = new ArrayList();
 
             if (histQuoteList != null) {
@@ -155,29 +163,18 @@ public final class QuoteSyncJob {
                             histQuote.getClose().floatValue()));
                 }
             }
+
             broadcastIntent.putParcelableArrayListExtra(Constants.Extra.EXTRA_HIST_QUOTE_LIST,
                     entries);
             LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
-
         } catch (IOException exception) {
             Timber.e(exception, "Error fetching stock quotes");
             Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction(Constants.Action.ACTION_SYNC_ERROR);
+            broadcastIntent.setAction(Constants.Action.ACTION_SYNC_END);
+            broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
+                    Constants.SyncResultType.RESULT_ERROR);
             LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
         }
-
-        //List<HistoricalQuote>
-
-
-       /* try {
-            List<HistoricalQuote> histQuoteList = histQuotesRequest.getResult();
-            generateStockChart(histQuoteList);
-        } catch (IOException e) {
-            e.printStackTrace();
-
-        }*/
-
-
     }
 
 

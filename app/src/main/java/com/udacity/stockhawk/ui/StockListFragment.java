@@ -22,6 +22,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -62,7 +63,7 @@ public class StockListFragment extends Fragment implements LoaderManager
     TextView mErrorTextView;
 
     private StockAdapter adapter;
-    private final SyncErrorReceiver mSyncErrorReceiver = new SyncErrorReceiver();
+    private final SyncEndReceiver mSyncEndReceiver = new SyncEndReceiver();
     private Context mContext;
     private OnStockListFragmentListener mOnStockListFragmentListener;
 
@@ -103,6 +104,10 @@ public class StockListFragment extends Fragment implements LoaderManager
     public void onStart() {
         super.onStart();
         QuoteSyncJob.initializeSyncJob(mContext);
+        if (!networkUp()) {
+            Toast.makeText(mContext, R.string.toast_no_please_check_connectivity, Toast
+                    .LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -114,18 +119,18 @@ public class StockListFragment extends Fragment implements LoaderManager
     @Override
     public void onResume() {
         super.onResume();
-        if (mSyncErrorReceiver != null) {
+        if (mSyncEndReceiver != null) {
             LocalBroadcastManager.getInstance(mContext)
-                    .registerReceiver(mSyncErrorReceiver, new IntentFilter(Constants.Action
-                            .ACTION_SYNC_ERROR));
+                    .registerReceiver(mSyncEndReceiver, new IntentFilter(Constants.Action
+                            .ACTION_SYNC_END));
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (mSyncErrorReceiver != null) {
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mSyncErrorReceiver);
+        if (mSyncEndReceiver != null) {
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mSyncEndReceiver);
         }
     }
 
@@ -172,7 +177,7 @@ public class StockListFragment extends Fragment implements LoaderManager
             public void onClick(View v) {
                 AddStockDialog addStockDialog = new AddStockDialog();
                 addStockDialog.setTargetFragment(StockListFragment.this,
-                        Constants.Request.REQUEST_STOCK_DIALOG);
+                        Constants.Dialog.STOCK_DIALOG);
                 addStockDialog.show(getActivity().getSupportFragmentManager(),
                         StockListFragment.class.getSimpleName());
             }
@@ -195,7 +200,7 @@ public class StockListFragment extends Fragment implements LoaderManager
 
         if (!networkUp() && adapter.getItemCount() == 0) {
             mSwipeRefreshLayout.setRefreshing(false);
-            mErrorTextView.setText(getString(R.string.error_no_network));
+            mErrorTextView.setText(getString(R.string.error_no_stocks_no_connectivity));
             mErrorTextView.setVisibility(View.VISIBLE);
         } else if (!networkUp()) {
             mSwipeRefreshLayout.setRefreshing(false);
@@ -230,8 +235,8 @@ public class StockListFragment extends Fragment implements LoaderManager
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == Constants.Request.REQUEST_STOCK_DIALOG
-                && resultCode == Constants.Result.RESULT_STOCK_DIALOG
+        if (requestCode == Constants.Dialog.STOCK_DIALOG
+                && resultCode == Constants.Dialog.STOCK_DIALOG
                 && data != null && data.hasExtra(Constants.Extra.EXTRA_STOCK_SYMBOL)) {
             addStock(data.getStringExtra(Constants.Extra.EXTRA_STOCK_SYMBOL));
         }
@@ -247,7 +252,8 @@ public class StockListFragment extends Fragment implements LoaderManager
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mSwipeRefreshLayout.setRefreshing(false);
+        // TODO: Remove?
+        //mSwipeRefreshLayout.setRefreshing(false);
 
         if (data != null && data.getCount() != 0) {
             mErrorTextView.setVisibility(View.GONE);
@@ -258,7 +264,8 @@ public class StockListFragment extends Fragment implements LoaderManager
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mSwipeRefreshLayout.setRefreshing(false);
+        // TODO: Remove?
+        //mSwipeRefreshLayout.setRefreshing(false);
         adapter.setCursor(null);
     }
 
@@ -343,16 +350,33 @@ public class StockListFragment extends Fragment implements LoaderManager
     }
 
 
-    public class SyncErrorReceiver extends BroadcastReceiver {
+    public class SyncEndReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null) {
-                //TODO: Call this method from the Fragment?
-                if (mSwipeRefreshLayout != null) {
-                    mSwipeRefreshLayout.setRefreshing(false);
+                if (TextUtils.equals(intent.getAction(), Constants.Action.ACTION_SYNC_END) &&
+                        (intent.hasExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE))) {
+
+                    if (mSwipeRefreshLayout != null) {
+                        mSwipeRefreshLayout.setRefreshing(false);
+                    }
+
+                    int resultType = intent.getIntExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
+                            Constants.SyncResultType.RESULT_UNKNOWN);
+
+                    switch (resultType) {
+                        case Constants.SyncResultType.RESULT_SUCCESS:
+                            // Do nothing
+                            break;
+                        case Constants.SyncResultType.RESULT_ERROR:
+                            Toast.makeText(context, R.string.toast_sync_error_try_again, Toast
+                                    .LENGTH_LONG).show();
+                            break;
+                        default:
+                            break;
+
+                    }
                 }
-                Toast.makeText(context, R.string.toast_sync_error_try_again, Toast.LENGTH_LONG)
-                        .show();
             }
         }
     }

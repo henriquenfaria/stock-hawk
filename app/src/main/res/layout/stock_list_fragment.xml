@@ -27,15 +27,6 @@
                 android:paddingRight="@dimen/activity_horizontal_margin"/>
 
         </android.support.v4.widget.SwipeRefreshLayout>
-
-        <TextView
-            android:id="@+id/error"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:textAppearance="@android:style/TextAppearance.Medium"
-            android:visibility="gone"
-            tools:text="Error message"/>
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
@@ -52,5 +43,16 @@
         app:layout_anchor="@id/main_layout"
         app:layout_anchorGravity="bottom|right|end"
         app:pressedTranslationZ="12dp"/>
+
+    <TextView
+        android:id="@+id/error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        android:visibility="gone"
+        app:layout_anchor="@id/main_layout"
+        app:layout_anchorGravity="center"/>
 
 </android.support.design.widget.CoordinatorLayout>
