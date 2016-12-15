@@ -5,8 +5,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -131,18 +129,14 @@ public final class QuoteSyncJob {
     }
 
     static void getHistQuotes(Context context, String stockSymbol) {
-
         Timber.d("Running hist sync job");
 
-        // TODO: Make logic to change the HistQuotesRequest parameters.
-        // Intervals: Yearly, montly, weekly
-        // Timespan: 1 year, 2 years, 3 years
         Calendar from = Calendar.getInstance();
         from.add(Calendar.YEAR, -1);
         Calendar to = Calendar.getInstance();
 
         HistQuotesRequest histQuotesRequest = new HistQuotesRequest(stockSymbol, from, to,
-                Interval.MONTHLY);
+                Interval.WEEKLY);
 
         try {
             List<HistoricalQuote> histQuoteList = histQuotesRequest.getResult();
@@ -151,11 +145,11 @@ public final class QuoteSyncJob {
             broadcastIntent.setAction(Constants.Action.ACTION_HIST_SYNC_END);
             broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
                     Constants.SyncResultType.RESULT_SUCCESS);
-            ArrayList<Entry> entries = new ArrayList();
+            ArrayList<Entry> entries = new ArrayList<>();
 
             if (histQuoteList != null) {
                 for (HistoricalQuote histQuote : histQuoteList) {
-                    entries.add(new Entry(histQuote.getDate().get(Calendar.MONTH),
+                    entries.add(new Entry(histQuote.getDate().get(Calendar.WEEK_OF_YEAR),
                             histQuote.getClose().floatValue()));
                 }
             }

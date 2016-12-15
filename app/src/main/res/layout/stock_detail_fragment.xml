@@ -4,10 +4,20 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
+              android:weightSum="8"
               tools:context=".ui.StockDetailFragment">
+
+    <TextView
+        android:id="@+id/chart_header"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="7"
+        android:gravity="center"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/stock_chart"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_weight="1"/>
 </LinearLayout>

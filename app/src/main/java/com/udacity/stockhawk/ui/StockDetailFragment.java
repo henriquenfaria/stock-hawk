@@ -13,6 +13,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.animation.Easing;
@@ -47,6 +48,9 @@ public class StockDetailFragment extends Fragment {
 
     @BindView(R.id.stock_chart)
     LineChart mLineChart;
+
+    @BindView(R.id.chart_header)
+    TextView mChartHeader;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -123,6 +127,7 @@ public class StockDetailFragment extends Fragment {
         QuoteSyncJob.syncHistoryImmediately(mContext, mStockSymbol);
 
         mLineChart.setNoDataText(getString(R.string.status_loading_chart_data));
+        mChartHeader.setText(getString(R.string.chart_detail_title, mStockSymbol));
 
         return view;
     }
@@ -155,6 +160,7 @@ public class StockDetailFragment extends Fragment {
         YAxis yLeftAxis = mLineChart.getAxisLeft();
         yLeftAxis.setTextColor(Color.WHITE);
         yLeftAxis.setAxisMinimum(0);
+        yLeftAxis.setGranularity(1);
         yLeftAxis.setValueFormatter(new IAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
@@ -166,6 +172,8 @@ public class StockDetailFragment extends Fragment {
         // X Axis styling
         XAxis xAxis = mLineChart.getXAxis();
         xAxis.setTextColor(Color.WHITE);
+        xAxis.setGranularity(1);
+        xAxis.setLabelCount(13);
         xAxis.setValueFormatter(new IAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
