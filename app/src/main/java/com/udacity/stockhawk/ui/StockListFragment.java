@@ -81,9 +81,9 @@ public class StockListFragment extends Fragment implements LoaderManager
     }
 
     @Override
-    public void onClick(String symbol, int type) {
-        Timber.d("Symbol clicked: %s with type %d", symbol, type);
-        mOnStockListFragmentListener.onStockListFragmentListener(symbol, type);
+    public void onClick(String symbol, String history, int type) {
+        Timber.d("Symbol clicked: %s Type: %d History: %s", symbol, type, history);
+        mOnStockListFragmentListener.onStockListFragmentListener(symbol, history, type);
     }
 
     @Override
@@ -348,7 +348,7 @@ public class StockListFragment extends Fragment implements LoaderManager
 
 
     public interface OnStockListFragmentListener {
-        void onStockListFragmentListener(String symbol, int type);
+        void onStockListFragmentListener(String symbol, String history, int type);
     }
 
 
@@ -376,7 +376,6 @@ public class StockListFragment extends Fragment implements LoaderManager
                             break;
                         default:
                             break;
-
                     }
                 }
             }

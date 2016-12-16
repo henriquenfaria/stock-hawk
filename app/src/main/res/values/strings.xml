@@ -31,5 +31,6 @@
     <string name="unknown_stock_no_details">Unknown stock, no details to show...</string>
     <string name="loading_stock_please_wait">Loading stock, please wait...</string>
     <string name="status_loading_chart_data">Loading chart data...</string>
-    <string name="chart_detail_title">%1$s value over the last 52 weeks</string>
+    <string name="error_stock_history">Error loading stock history</string>
+    <string name="chart_detail_title">%1$s value over the last 12 months</string>
 </resources>

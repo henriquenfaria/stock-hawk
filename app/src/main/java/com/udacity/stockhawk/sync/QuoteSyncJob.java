@@ -1,6 +1,5 @@
 package com.udacity.stockhawk.sync;
 
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +14,6 @@ import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.RetryStrategy;
 import com.firebase.jobdispatcher.Trigger;
-import com.github.mikephil.charting.data.Entry;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.utils.Constants;
 
@@ -24,11 +22,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 import timber.log.Timber;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
-import yahoofinance.histquotes.HistQuotesRequest;
 import yahoofinance.histquotes.HistoricalQuote;
 import yahoofinance.histquotes.Interval;
 import yahoofinance.quotes.stock.StockQuote;
@@ -37,9 +35,8 @@ public final class QuoteSyncJob {
 
     private static final String JOB_TAG_ONE_OFF = "job_tag_one_off";
     private static final String JOB_TAG_PERIODIC = "job_tag_periodic";
-    private static final String JOB_TAG_ONE_OFF_HISTORY = "job_tag_one_off_history";
-    private static final int PERIOD = 30;
-
+    private static final int PERIOD_SYNC = 30;
+    private static final int PERIOD_HISTORY = 1;
 
     static void getQuotes(Context context) {
 
@@ -47,12 +44,13 @@ public final class QuoteSyncJob {
 
         Calendar from = Calendar.getInstance();
         Calendar to = Calendar.getInstance();
-        from.add(Calendar.YEAR, -2);
+        from.add(Calendar.YEAR, -PERIOD_HISTORY);
 
         Cursor cursor = null;
 
         try {
             cursor = context.getContentResolver().query(Contract.Quote.uri, null, null, null, null);
+            ArrayList<String> stocksArrayList = new ArrayList<>();
 
             if (cursor != null && cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
@@ -62,51 +60,57 @@ public final class QuoteSyncJob {
                     boolean isUnknown = cursor.getInt(cursor.getColumnIndex
                             (Contract.Quote.COLUMN_TYPE)) == Constants.StockType.UNKNOWN;
 
-                    // Stock is available/known and we should update it, otherwise skip it
                     if (!isUnknown) {
-                        // TODO: Bulk query as before? Is it faster?
-                        Stock stock = YahooFinance.get(symbol);
-                        StockQuote quote = stock.getQuote();
-                        BigDecimal price = quote.getPrice();
-                        BigDecimal ask = quote.getAsk();
-
-                        ContentValues quoteCV = new ContentValues();
-
-                        // The price or ask is null, so this is a unknown stock!
-                        // There are unknown stocks that the price is not null and ask is null,
-                        // that's why we need to check both values
-                        if (price == null || ask == null) {
-                            quoteCV.put(Contract.Quote.COLUMN_TYPE, Constants.StockType
-                                    .UNKNOWN);
-                        } else {
-                            BigDecimal change = quote.getChange();
-                            BigDecimal percentChange = quote.getChangeInPercent();
-
-                            // WARNING! Don't request historical data for a stock that doesn't exist
-                            // The request will hang forever X_x
-                            List<HistoricalQuote> history = stock.getHistory(from, to, Interval
-                                    .WEEKLY);
-
-                            StringBuilder historyBuilder = new StringBuilder();
-
-                            for (HistoricalQuote it : history) {
-                                historyBuilder.append(it.getDate().getTimeInMillis());
-                                historyBuilder.append(", ");
-                                historyBuilder.append(it.getClose());
-                                historyBuilder.append("\n");
-                            }
-                            quoteCV.put(Contract.Quote.COLUMN_TYPE, Constants.StockType
-                                    .KNOWN);
-                            quoteCV.put(Contract.Quote.COLUMN_PRICE, price.floatValue());
-                            quoteCV.put(Contract.Quote.COLUMN_PERCENTAGE_CHANGE, change
-                                    .floatValue());
-                            quoteCV.put(Contract.Quote.COLUMN_ABSOLUTE_CHANGE, percentChange
-                                    .floatValue());
-                            quoteCV.put(Contract.Quote.COLUMN_HISTORY, historyBuilder.toString());
-                        }
-                        context.getContentResolver().update(Contract.Quote.uri, quoteCV,
-                                Contract.Quote.COLUMN_SYMBOL + "=?", new String[]{symbol});
+                        stocksArrayList.add(symbol);
                     }
+                }
+
+                String[] stocksArray = stocksArrayList.toArray(new String[stocksArrayList.size()]);
+                Map<String, Stock> quotes = YahooFinance.get(stocksArray);
+
+                for (String symbol : stocksArray) {
+                    Stock stock = quotes.get(symbol);
+                    StockQuote quote = stock.getQuote();
+                    BigDecimal price = quote.getPrice();
+                    BigDecimal ask = quote.getAsk();
+
+                    ContentValues quoteCV = new ContentValues();
+
+                    // The price or ask is null, so this is a unknown stock!
+                    // There are unknown stocks that the price is not null and ask is null,
+                    // that's why we need to check both values
+                    if (price == null || ask == null) {
+                        quoteCV.put(Contract.Quote.COLUMN_TYPE, Constants.StockType
+                                .UNKNOWN);
+                    } else {
+                        BigDecimal change = quote.getChange();
+                        BigDecimal percentChange = quote.getChangeInPercent();
+
+                        // WARNING! Don't request historical data for a stock that doesn't exist
+                        // The request will hang forever X_x
+                        List<HistoricalQuote> history = stock.getHistory(from, to, Interval
+                                .WEEKLY);
+
+                        StringBuilder historyBuilder = new StringBuilder();
+
+                        for (HistoricalQuote it : history) {
+                            //historyBuilder.append(it.getDate().get(Calendar.WEEK_OF_YEAR));
+                            historyBuilder.append(it.getDate().getTimeInMillis());
+                            historyBuilder.append("&");
+                            historyBuilder.append(it.getClose().floatValue());
+                            historyBuilder.append("\n");
+                        }
+                        quoteCV.put(Contract.Quote.COLUMN_TYPE, Constants.StockType
+                                .KNOWN);
+                        quoteCV.put(Contract.Quote.COLUMN_PRICE, price.floatValue());
+                        quoteCV.put(Contract.Quote.COLUMN_PERCENTAGE_CHANGE, change
+                                .floatValue());
+                        quoteCV.put(Contract.Quote.COLUMN_ABSOLUTE_CHANGE, percentChange
+                                .floatValue());
+                        quoteCV.put(Contract.Quote.COLUMN_HISTORY, historyBuilder.toString());
+                    }
+                    context.getContentResolver().update(Contract.Quote.uri, quoteCV,
+                            Contract.Quote.COLUMN_SYMBOL + "=?", new String[]{symbol});
                 }
             }
             Intent broadcastIntent = new Intent();
@@ -128,48 +132,8 @@ public final class QuoteSyncJob {
         }
     }
 
-    static void getHistQuotes(Context context, String stockSymbol) {
-        Timber.d("Running hist sync job");
-
-        Calendar from = Calendar.getInstance();
-        from.add(Calendar.YEAR, -1);
-        Calendar to = Calendar.getInstance();
-
-        HistQuotesRequest histQuotesRequest = new HistQuotesRequest(stockSymbol, from, to,
-                Interval.WEEKLY);
-
-        try {
-            List<HistoricalQuote> histQuoteList = histQuotesRequest.getResult();
-
-            Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction(Constants.Action.ACTION_HIST_SYNC_END);
-            broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
-                    Constants.SyncResultType.RESULT_SUCCESS);
-            ArrayList<Entry> entries = new ArrayList<>();
-
-            if (histQuoteList != null) {
-                for (HistoricalQuote histQuote : histQuoteList) {
-                    entries.add(new Entry(histQuote.getDate().get(Calendar.WEEK_OF_YEAR),
-                            histQuote.getClose().floatValue()));
-                }
-            }
-
-            broadcastIntent.putParcelableArrayListExtra(Constants.Extra.EXTRA_HIST_QUOTE_LIST,
-                    entries);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
-        } catch (IOException exception) {
-            Timber.e(exception, "Error fetching stock quotes");
-            Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction(Constants.Action.ACTION_HIST_SYNC_END);
-            broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
-                    Constants.SyncResultType.RESULT_ERROR);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
-        }
-    }
-
-
     private static void schedulePeriodic(Context context) {
-        Timber.d("Scheduling a periodic sync every " + PERIOD + " seconds");
+        Timber.d("Scheduling a periodic sync every " + PERIOD_SYNC + " seconds");
 
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(context));
 
@@ -177,7 +141,7 @@ public final class QuoteSyncJob {
                 .setService(QuoteJobService.class)
                 .setTag(JOB_TAG_PERIODIC)
                 .setRecurring(true)
-                .setTrigger(Trigger.executionWindow(PERIOD, PERIOD))
+                .setTrigger(Trigger.executionWindow(PERIOD_SYNC, PERIOD_SYNC))
                 .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
                 .setConstraints(Constraint.ON_ANY_NETWORK)
                 .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
@@ -194,8 +158,6 @@ public final class QuoteSyncJob {
                 (context));
 
         Bundle bundle = new Bundle();
-        bundle.putInt(Constants.Extra.EXTRA_JOB_TYPE, Constants.JobType.NORMAL);
-
         Job myJob = dispatcher.newJobBuilder()
                 .setService(QuoteJobService.class)
                 .setTag(JOB_TAG_ONE_OFF)
@@ -212,30 +174,6 @@ public final class QuoteSyncJob {
 
     }
 
-    synchronized public static void syncHistoryImmediately(Context context, String symbol) {
-        Timber.d("Scheduling a history immediate sync");
-        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver
-                (context));
-
-        Bundle bundle = new Bundle();
-        bundle.putInt(Constants.Extra.EXTRA_JOB_TYPE, Constants.JobType.HISTORY);
-        bundle.putString(Constants.Extra.EXTRA_STOCK_SYMBOL, symbol);
-
-        Job myJob = dispatcher.newJobBuilder()
-                .setService(QuoteJobService.class)
-                .setTag(JOB_TAG_ONE_OFF_HISTORY)
-                .setExtras(bundle)
-                .setRecurring(false)
-                .setTrigger(Trigger.executionWindow(0, 0))
-                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
-                .setConstraints(Constraint.ON_ANY_NETWORK)
-                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
-                .setReplaceCurrent(true)
-                .build();
-
-        dispatcher.mustSchedule(myJob);
-    }
-
     synchronized public static void initializeSyncJob(final Context context) {
         schedulePeriodic(context);
         syncImmediately(context);
@@ -247,12 +185,5 @@ public final class QuoteSyncJob {
 
         dispatcher.cancel(JOB_TAG_ONE_OFF);
         dispatcher.cancel(JOB_TAG_PERIODIC);
-    }
-
-    synchronized public static void stopHistSyncJob(final Context context) {
-        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver
-                (context));
-
-        dispatcher.cancel(JOB_TAG_ONE_OFF_HISTORY);
     }
 }

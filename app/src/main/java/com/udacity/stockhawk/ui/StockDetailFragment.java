@@ -1,20 +1,14 @@
 package com.udacity.stockhawk.ui;
 
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.LineChart;
@@ -28,23 +22,25 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.utils.EntryXComparator;
 import com.udacity.stockhawk.R;
-import com.udacity.stockhawk.sync.QuoteSyncJob;
 import com.udacity.stockhawk.utils.Constants;
+import com.udacity.stockhawk.utils.Utils;
 
 import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 
 public class StockDetailFragment extends Fragment {
 
     private static final String ARG_STOCK_SYMBOL = "arg_stock_symbol";
+    private static final String ARG_STOCK_HISTORY = "arg_stock_history";
     private String mStockSymbol;
+    private String mStockHistory;
     private OnStockDetailFragmentListener mOnStockDetailFragmentListener;
     private Context mContext;
-    private final HistSyncEndReceiver mHistSyncEndReceiver = new HistSyncEndReceiver();
 
     @BindView(R.id.stock_chart)
     LineChart mLineChart;
@@ -60,36 +56,13 @@ public class StockDetailFragment extends Fragment {
     }
 
     // Create new Fragment instance
-    public static StockDetailFragment newInstance(String stockSymbol) {
+    public static StockDetailFragment newInstance(String stockSymbol, String stockHistory) {
         StockDetailFragment fragment = new StockDetailFragment();
         Bundle args = new Bundle();
         args.putString(ARG_STOCK_SYMBOL, stockSymbol);
+        args.putString(ARG_STOCK_HISTORY, stockHistory);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mHistSyncEndReceiver != null) {
-            LocalBroadcastManager.getInstance(mContext)
-                    .registerReceiver(mHistSyncEndReceiver, new IntentFilter(Constants.Action
-                            .ACTION_HIST_SYNC_END));
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mHistSyncEndReceiver != null) {
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mHistSyncEndReceiver);
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        QuoteSyncJob.stopHistSyncJob(mContext);
     }
 
     @Override
@@ -106,41 +79,39 @@ public class StockDetailFragment extends Fragment {
         mContext = context;
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
             mStockSymbol = getArguments().getString(ARG_STOCK_SYMBOL);
+            mStockHistory = getArguments().getString(ARG_STOCK_HISTORY);
         }
         getActivity().setTitle(mStockSymbol);
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.stock_detail_fragment, container, false);
         ButterKnife.bind(this, view);
-
-        QuoteSyncJob.syncHistoryImmediately(mContext, mStockSymbol);
-
-        mLineChart.setNoDataText(getString(R.string.status_loading_chart_data));
         mChartHeader.setText(getString(R.string.chart_detail_title, mStockSymbol));
 
+        try {
+            List<Entry> entries = Utils.createEntryListFromString(mStockHistory);
+            generateStockChart(entries);
+        } catch (NumberFormatException exception) {
+            Timber.e(exception, "Error while generating stock chart");
+            mLineChart.setNoDataText(getString(R.string.error_stock_history));
+        }
         return view;
     }
 
-
     private void generateStockChart(List<Entry> entries) {
+        mLineChart.setNoDataText(getString(R.string.status_loading_chart_data));
         Collections.sort(entries, new EntryXComparator());
-
         LineDataSet dataSet = new LineDataSet(entries, null);
         dataSet.setForm(Legend.LegendForm.NONE);
-        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        //TODO: Low cubic intensity. Tweak this value and create constant.
-        dataSet.setCubicIntensity(0.05f);
         dataSet.setDrawValues(false);
         dataSet.setDrawCircles(false);
         dataSet.setDrawFilled(true);
@@ -172,15 +143,20 @@ public class StockDetailFragment extends Fragment {
         // X Axis styling
         XAxis xAxis = mLineChart.getXAxis();
         xAxis.setTextColor(Color.WHITE);
-        xAxis.setGranularity(1);
-        xAxis.setLabelCount(13);
+        xAxis.setLabelCount(5, true);
         xAxis.setValueFormatter(new IAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
-                String formattedValue = String.format("%.0f", value);
-                return formattedValue;
+                String formattedDate = Utils.formatMillisecondsForLocale((long) value);
+                return formattedDate;
             }
         });
+
+        //TODO: Enable pinch zoom?
+        mLineChart.setScaleEnabled(false);
+
+        //TODO: Need to test on other resolutions
+        mLineChart.setExtraOffsets(5f, 0, 30f, 0);
 
         mLineChart.setData(lineData);
         mLineChart.setDrawMarkers(true);
@@ -193,42 +169,4 @@ public class StockDetailFragment extends Fragment {
     public interface OnStockDetailFragmentListener {
     }
 
-    public class HistSyncEndReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent != null) {
-                if (TextUtils.equals(intent.getAction(), Constants.Action.ACTION_HIST_SYNC_END) &&
-                        (intent.hasExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE))) {
-
-                    int resultType = intent.getIntExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
-                            Constants.SyncResultType.RESULT_UNKNOWN);
-
-                    switch (resultType) {
-                        case Constants.SyncResultType.RESULT_SUCCESS:
-                            if (intent.hasExtra(Constants.Extra.EXTRA_HIST_QUOTE_LIST)) {
-                                List<Entry> entries = intent.getParcelableArrayListExtra
-                                        (Constants.Extra
-                                        .EXTRA_HIST_QUOTE_LIST);
-
-                                if (mLineChart != null && entries != null) {
-                                    generateStockChart(entries);
-                                }
-                            } else {
-                                Toast.makeText(context, R.string.toast_sync_error_try_again, Toast
-                                        .LENGTH_LONG).show();
-                            }
-                            break;
-                        case Constants.SyncResultType.RESULT_ERROR:
-                            Toast.makeText(context, R.string.toast_sync_error_try_again, Toast
-                                    .LENGTH_LONG).show();
-                            break;
-                        default:
-                            break;
-
-                    }
-                }
-            }
-        }
-    }
 }

@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.udacity.stockhawk.R;
@@ -32,8 +30,8 @@ public class StockListActivity extends AppCompatActivity implements StockListFra
     }
 
     @Override
-    public void onStockListFragmentListener(String symbol, int type) {
-         switch (type) {
+    public void onStockListFragmentListener(String symbol, String history, int type) {
+        switch (type) {
             case Constants.StockType.LOADING:
                 Toast.makeText(this, R.string.loading_stock_please_wait,
                         Toast.LENGTH_LONG).show();
@@ -44,8 +42,9 @@ public class StockListActivity extends AppCompatActivity implements StockListFra
                 break;
             case Constants.StockType.KNOWN:
                 QuoteSyncJob.stopSyncJob(this);
-                Intent intent = new Intent(this, StockDetailActivity.class).
-                        putExtra(Constants.Extra.EXTRA_STOCK_SYMBOL, symbol);
+                Intent intent = new Intent(this, StockDetailActivity.class);
+                intent.putExtra(Constants.Extra.EXTRA_STOCK_SYMBOL, symbol);
+                intent.putExtra(Constants.Extra.EXTRA_STOCK_HISTORY, history);
                 startActivity(intent);
                 break;
         }

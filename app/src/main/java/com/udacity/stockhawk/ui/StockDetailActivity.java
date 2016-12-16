@@ -3,13 +3,11 @@ package com.udacity.stockhawk.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.utils.Constants;
 
-import static com.github.mikephil.charting.charts.Chart.LOG_TAG;
-
+import timber.log.Timber;
 
 public class StockDetailActivity extends AppCompatActivity implements StockDetailFragment
         .OnStockDetailFragmentListener {
@@ -21,16 +19,22 @@ public class StockDetailActivity extends AppCompatActivity implements StockDetai
 
         if (savedInstanceState == null) {
             Intent intent = getIntent();
-            if (intent != null && intent.hasExtra(Constants.Extra.EXTRA_STOCK_SYMBOL)) {
-                String stockSymbol = intent
-                        .getStringExtra(Constants.Extra.EXTRA_STOCK_SYMBOL);
-
-                StockDetailFragment detailsFragment = StockDetailFragment.newInstance(stockSymbol);
+            if (intent != null) {
+                String stockSymbol = null;
+                String stockHistory = null;
+                if (intent.hasExtra(Constants.Extra.EXTRA_STOCK_SYMBOL)) {
+                    stockSymbol = intent
+                            .getStringExtra(Constants.Extra.EXTRA_STOCK_SYMBOL);
+                }
+                if (intent.hasExtra(Constants.Extra.EXTRA_STOCK_HISTORY)) {
+                    stockHistory = intent.getStringExtra(Constants.Extra.EXTRA_STOCK_HISTORY);
+                }
+                StockDetailFragment detailsFragment = StockDetailFragment
+                        .newInstance(stockSymbol, stockHistory);
                 getSupportFragmentManager().beginTransaction()
                         .add(R.id.stock_detail_fragment_container, detailsFragment).commit();
             } else {
-                Log.d(LOG_TAG, "Something went wrong. Intent doesn't have" +
-                        " Constants.Extra.EXTRA_STOCK_SYMBOL extra. " +
+                Timber.d("Something went wrong. Intent doesn't have extras!" +
                         "Finishing StockDetailActivity.");
                 finish();
             }
