@@ -12,12 +12,13 @@ import com.udacity.stockhawk.sync.QuoteSyncJob;
 import com.udacity.stockhawk.utils.Constants;
 
 public class StockListActivity extends AppCompatActivity implements StockListFragment
-        .OnStockListFragmentListener {
+        .OnStockListFragmentListener, StockDetailFragment.OnStockDetailFragmentListener {
+
+    private boolean mIsTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.stock_list_activity);
 
         if (savedInstanceState == null) {
@@ -25,6 +26,15 @@ public class StockListActivity extends AppCompatActivity implements StockListFra
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             StockListFragment stockListFragment = StockListFragment.newInstance();
             fragmentTransaction.add(R.id.stock_list_fragment_container, stockListFragment);
+            fragmentTransaction.commit();
+        }
+
+        if (findViewById(R.id.stock_detail_fragment_container) != null) {
+            mIsTwoPane = true;
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            StockDetailFragment stockDetailFragment = StockDetailFragment.newInstance();
+            fragmentTransaction.replace(R.id.stock_detail_fragment_container, stockDetailFragment);
             fragmentTransaction.commit();
         }
     }
@@ -42,10 +52,18 @@ public class StockListActivity extends AppCompatActivity implements StockListFra
                 break;
             case Constants.StockType.KNOWN:
                 QuoteSyncJob.stopSyncJob(this);
-                Intent intent = new Intent(this, StockDetailActivity.class);
-                intent.putExtra(Constants.Extra.EXTRA_STOCK_SYMBOL, symbol);
-                intent.putExtra(Constants.Extra.EXTRA_STOCK_HISTORY, history);
-                startActivity(intent);
+                if (mIsTwoPane) {
+                    StockDetailFragment stockDetailFragment = StockDetailFragment
+                            .newInstance(symbol, history);
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.stock_detail_fragment_container,
+                                    stockDetailFragment).commit();
+                } else {
+                    Intent intent = new Intent(this, StockDetailActivity.class);
+                    intent.putExtra(Constants.Extra.EXTRA_STOCK_SYMBOL, symbol);
+                    intent.putExtra(Constants.Extra.EXTRA_STOCK_HISTORY, history);
+                    startActivity(intent);
+                }
                 break;
         }
     }

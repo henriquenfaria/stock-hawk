@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.animation.Easing;
@@ -42,11 +43,14 @@ public class StockDetailFragment extends Fragment {
     private OnStockDetailFragmentListener mOnStockDetailFragmentListener;
     private Context mContext;
 
-    @BindView(R.id.stock_chart)
-    LineChart mLineChart;
+    @BindView(R.id.details_main)
+    LinearLayout mDetailsMain;
 
     @BindView(R.id.chart_header)
     TextView mChartHeader;
+
+    @BindView(R.id.stock_chart)
+    LineChart mLineChart;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -62,6 +66,11 @@ public class StockDetailFragment extends Fragment {
         args.putString(ARG_STOCK_SYMBOL, stockSymbol);
         args.putString(ARG_STOCK_HISTORY, stockHistory);
         fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static StockDetailFragment newInstance() {
+        StockDetailFragment fragment = new StockDetailFragment();
         return fragment;
     }
 
@@ -93,10 +102,15 @@ public class StockDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.stock_detail_fragment, container, false);
+
+        if (mStockSymbol == null && mStockHistory == null) {
+            return view;
+        }
+
         ButterKnife.bind(this, view);
         mChartHeader.setText(getString(R.string.chart_detail_title, mStockSymbol));
-
         try {
             List<Entry> entries = Utils.createEntryListFromString(mStockHistory);
             generateStockChart(entries);
@@ -104,6 +118,7 @@ public class StockDetailFragment extends Fragment {
             Timber.e(exception, "Error while generating stock chart");
             mLineChart.setNoDataText(getString(R.string.error_stock_history));
         }
+        mDetailsMain.setVisibility(View.VISIBLE);
         return view;
     }
 
