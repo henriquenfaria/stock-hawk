@@ -15,7 +15,7 @@ public class Contract {
 
     public static final class Quote implements BaseColumns {
 
-        public static final Uri uri = BASE_URI.buildUpon().appendPath(PATH_QUOTE).build();
+        public static final Uri URI = BASE_URI.buildUpon().appendPath(PATH_QUOTE).build();
 
         public static final String TABLE_NAME = "quotes";
 
@@ -34,11 +34,10 @@ public class Contract {
                 COLUMN_ABSOLUTE_CHANGE,
                 COLUMN_PERCENTAGE_CHANGE,
                 COLUMN_HISTORY
-
         };
 
         public static Uri makeUriForStock(String symbol) {
-            return uri.buildUpon().appendPath(symbol).build();
+            return URI.buildUpon().appendPath(symbol).build();
         }
 
         public static String getStockFromUri(Uri uri) {

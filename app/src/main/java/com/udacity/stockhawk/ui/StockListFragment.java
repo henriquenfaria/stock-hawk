@@ -17,7 +17,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -120,8 +119,7 @@ public class StockListFragment extends Fragment implements LoaderManager
     public void onResume() {
         super.onResume();
         if (mSyncEndReceiver != null) {
-            LocalBroadcastManager.getInstance(mContext)
-                    .registerReceiver(mSyncEndReceiver, new IntentFilter(Constants.Action
+            mContext.registerReceiver(mSyncEndReceiver, new IntentFilter(Constants.Action
                             .ACTION_SYNC_END));
         }
     }
@@ -130,7 +128,7 @@ public class StockListFragment extends Fragment implements LoaderManager
     public void onPause() {
         super.onPause();
         if (mSyncEndReceiver != null) {
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mSyncEndReceiver);
+            mContext.unregisterReceiver(mSyncEndReceiver);
         }
     }
 
@@ -227,7 +225,7 @@ public class StockListFragment extends Fragment implements LoaderManager
             ContentValues quoteCV = new ContentValues();
             quoteCV.put(Contract.Quote.COLUMN_SYMBOL, symbol);
             quoteCV.put(Contract.Quote.COLUMN_TYPE, Constants.StockType.LOADING);
-            mContext.getContentResolver().insert(Contract.Quote.uri, quoteCV);
+            mContext.getContentResolver().insert(Contract.Quote.URI, quoteCV);
             QuoteSyncJob.syncImmediately(mContext);
         }
     }
@@ -246,7 +244,7 @@ public class StockListFragment extends Fragment implements LoaderManager
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(mContext,
-                Contract.Quote.uri,
+                Contract.Quote.URI,
                 Contract.Quote.QUOTE_COLUMNS,
                 null, null, Contract.Quote.COLUMN_SYMBOL);
     }
@@ -335,7 +333,7 @@ public class StockListFragment extends Fragment implements LoaderManager
                 ContentValues quoteCV = new ContentValues();
                 quoteCV.put(Contract.Quote.COLUMN_SYMBOL, defaultStocks[i]);
                 quoteCV.put(Contract.Quote.COLUMN_TYPE, Constants.StockType.LOADING);
-                mContext.getContentResolver().insert(Contract.Quote.uri, quoteCV);
+                mContext.getContentResolver().insert(Contract.Quote.URI, quoteCV);
             }
 
         } else if (currentVersionCode > savedVersionCode) {

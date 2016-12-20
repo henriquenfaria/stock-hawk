@@ -24,49 +24,49 @@ import butterknife.ButterKnife;
 
 class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
 
-    final private Context context;
-    final private DecimalFormat dollarFormatWithPlus;
-    final private DecimalFormat dollarFormat;
-    final private DecimalFormat percentageFormat;
-    private Cursor cursor;
-    private StockAdapterOnClickHandler clickHandler;
+    final private Context mContext;
+    final private DecimalFormat mDollarFormatWithPlus;
+    final private DecimalFormat mDollarFormat;
+    final private DecimalFormat mPercentageFormat;
+    private Cursor mCursor;
+    private StockAdapterOnClickHandler mClickHandler;
 
     StockAdapter(Context context, StockAdapterOnClickHandler clickHandler) {
-        this.context = context;
-        this.clickHandler = clickHandler;
+        this.mContext = context;
+        this.mClickHandler = clickHandler;
 
-        dollarFormat = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.getDefault());
-        dollarFormatWithPlus = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.getDefault());
-        dollarFormatWithPlus.setPositivePrefix("+$");
-        percentageFormat = (DecimalFormat) NumberFormat.getPercentInstance(Locale.getDefault());
-        percentageFormat.setMaximumFractionDigits(2);
-        percentageFormat.setMinimumFractionDigits(2);
-        percentageFormat.setPositivePrefix("+");
+        mDollarFormat = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.getDefault());
+        mDollarFormatWithPlus = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.getDefault());
+        mDollarFormatWithPlus.setPositivePrefix("+$");
+        mPercentageFormat = (DecimalFormat) NumberFormat.getPercentInstance(Locale.getDefault());
+        mPercentageFormat.setMaximumFractionDigits(2);
+        mPercentageFormat.setMinimumFractionDigits(2);
+        mPercentageFormat.setPositivePrefix("+");
     }
 
     void setCursor(Cursor cursor) {
-        this.cursor = cursor;
+        this.mCursor = cursor;
         notifyDataSetChanged();
     }
 
     String getSymbolAtPosition(int position) {
-        cursor.moveToPosition(position);
-        return cursor.getString(cursor.getColumnIndex(Contract.Quote.COLUMN_SYMBOL));
+        mCursor.moveToPosition(position);
+        return mCursor.getString(mCursor.getColumnIndex(Contract.Quote.COLUMN_SYMBOL));
     }
 
     @Override
     public StockViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View item = LayoutInflater.from(context).inflate(R.layout.list_item_quote, parent, false);
+        View item = LayoutInflater.from(mContext).inflate(R.layout.list_item_quote, parent, false);
         return new StockViewHolder(item);
     }
 
     @Override
     public void onBindViewHolder(StockViewHolder holder, int position) {
-        cursor.moveToPosition(position);
-        holder.symbol.setText(cursor.getString(cursor.getColumnIndex(Contract.Quote
+        mCursor.moveToPosition(position);
+        holder.symbol.setText(mCursor.getString(mCursor.getColumnIndex(Contract.Quote
                 .COLUMN_SYMBOL)));
 
-        int stockType = cursor.getInt(cursor.getColumnIndex(Contract.Quote.COLUMN_TYPE));
+        int stockType = mCursor.getInt(mCursor.getColumnIndex(Contract.Quote.COLUMN_TYPE));
         switch (stockType) {
             case Constants.StockType.LOADING:
                 holder.priceChangeLayout.setVisibility(View.GONE);
@@ -81,12 +81,12 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
             case Constants.StockType.KNOWN:
                 holder.priceChangeLayout.setVisibility(View.VISIBLE);
                 holder.stockStatusLayout.setVisibility(View.GONE);
-                holder.price.setText(dollarFormat.format(cursor.getFloat(cursor.getColumnIndex
+                holder.price.setText(mDollarFormat.format(mCursor.getFloat(mCursor.getColumnIndex
                         (Contract.Quote.COLUMN_PRICE))));
 
-                float rawAbsoluteChange = cursor.getFloat(cursor.getColumnIndex(Contract.Quote
+                float rawAbsoluteChange = mCursor.getFloat(mCursor.getColumnIndex(Contract.Quote
                         .COLUMN_ABSOLUTE_CHANGE));
-                float percentageChange = cursor.getFloat(cursor.getColumnIndex(Contract.Quote
+                float percentageChange = mCursor.getFloat(mCursor.getColumnIndex(Contract.Quote
                         .COLUMN_PERCENTAGE_CHANGE));
 
                 if (rawAbsoluteChange > 0) {
@@ -95,26 +95,24 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
                     holder.change.setBackgroundResource(R.drawable.percent_change_pill_red);
                 }
 
-                String change = dollarFormatWithPlus.format(rawAbsoluteChange);
-                String percentage = percentageFormat.format(percentageChange / 100);
+                String change = mDollarFormatWithPlus.format(rawAbsoluteChange);
+                String percentage = mPercentageFormat.format(percentageChange / 100);
 
-                if (Utils.getDisplayMode(context)
-                        .equals(context.getString(R.string.pref_display_mode_absolute_key))) {
+                if (Utils.getDisplayMode(mContext)
+                        .equals(mContext.getString(R.string.pref_display_mode_absolute_key))) {
                     holder.change.setText(change);
                 } else {
                     holder.change.setText(percentage);
                 }
                 break;
-
         }
-
     }
 
     @Override
     public int getItemCount() {
         int count = 0;
-        if (cursor != null) {
-            count = cursor.getCount();
+        if (mCursor != null) {
+            count = mCursor.getCount();
         }
         return count;
     }
@@ -153,12 +151,12 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
         @Override
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
-            cursor.moveToPosition(adapterPosition);
-            int symbolColumn = cursor.getColumnIndex(Contract.Quote.COLUMN_SYMBOL);
-            int stockTypeColumn = cursor.getColumnIndex(Contract.Quote.COLUMN_TYPE);
-            int stockHistoryColumn = cursor.getColumnIndex(Contract.Quote.COLUMN_HISTORY);
-            clickHandler.onClick(cursor.getString(symbolColumn),
-                    cursor.getString(stockHistoryColumn), cursor.getInt(stockTypeColumn));
+            mCursor.moveToPosition(adapterPosition);
+            int symbolColumn = mCursor.getColumnIndex(Contract.Quote.COLUMN_SYMBOL);
+            int stockTypeColumn = mCursor.getColumnIndex(Contract.Quote.COLUMN_TYPE);
+            int stockHistoryColumn = mCursor.getColumnIndex(Contract.Quote.COLUMN_HISTORY);
+            mClickHandler.onClick(mCursor.getString(symbolColumn),
+                    mCursor.getString(stockHistoryColumn), mCursor.getInt(stockTypeColumn));
         }
     }
 }
