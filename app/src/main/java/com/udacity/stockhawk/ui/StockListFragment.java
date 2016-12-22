@@ -1,5 +1,6 @@
 package com.udacity.stockhawk.ui;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -13,7 +14,9 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -179,6 +182,7 @@ public class StockListFragment extends Fragment implements LoaderManager
                         Constants.Dialog.STOCK_DIALOG);
                 addStockDialog.show(getActivity().getSupportFragmentManager(),
                         StockListFragment.class.getSimpleName());
+
             }
         });
 
