@@ -2,8 +2,6 @@ package com.udacity.stockhawk.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
@@ -21,21 +19,34 @@ public class StockListActivity extends AppCompatActivity implements StockListFra
         super.onCreate(savedInstanceState);
         setContentView(R.layout.stock_list_activity);
 
-        if (savedInstanceState == null) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            StockListFragment stockListFragment = StockListFragment.newInstance();
-            fragmentTransaction.add(R.id.stock_list_fragment_container, stockListFragment);
-            fragmentTransaction.commit();
-        }
-
         if (findViewById(R.id.stock_detail_fragment_container) != null) {
             mIsTwoPane = true;
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            StockDetailFragment stockDetailFragment = StockDetailFragment.newInstance();
-            fragmentTransaction.replace(R.id.stock_detail_fragment_container, stockDetailFragment);
-            fragmentTransaction.commit();
+        }
+
+        if (savedInstanceState == null) {
+            StockListFragment stockListFragment = StockListFragment.newInstance();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.stock_list_fragment_container, stockListFragment).commit();
+
+            if (mIsTwoPane) {
+                StockDetailFragment stockDetailFragment = StockDetailFragment
+                        .newInstance();
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.stock_detail_fragment_container,
+                                stockDetailFragment).commit();
+            }
+        }
+
+        Intent intent = getIntent();
+        if (intent != null && mIsTwoPane && intent.hasExtra(Constants.Extra.EXTRA_STOCK_SYMBOL)
+                && intent.hasExtra(Constants.Extra.EXTRA_STOCK_HISTORY)) {
+            String symbol = intent.getStringExtra(Constants.Extra.EXTRA_STOCK_SYMBOL);
+            String history = intent.getStringExtra(Constants.Extra.EXTRA_STOCK_HISTORY);
+            StockDetailFragment stockDetailFragment = StockDetailFragment
+                    .newInstance(symbol, history);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.stock_detail_fragment_container,
+                            stockDetailFragment).commit();
         }
     }
 

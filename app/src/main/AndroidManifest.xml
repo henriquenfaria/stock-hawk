@@ -17,7 +17,6 @@
         <activity android:name=".ui.StockListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
@@ -58,7 +57,7 @@
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-                <action android:name="com.udacity.stockhawk.ACTION_SYNC_END"/>
+                <action android:name="com.udacity.stockhawk.ACTION_UPDATE_WIDGETS"/>
             </intent-filter>
 
             <meta-data

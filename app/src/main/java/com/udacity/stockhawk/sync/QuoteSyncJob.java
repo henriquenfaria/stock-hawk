@@ -15,6 +15,7 @@ import com.firebase.jobdispatcher.RetryStrategy;
 import com.firebase.jobdispatcher.Trigger;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.utils.Constants;
+import com.udacity.stockhawk.utils.Utils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -81,38 +82,40 @@ public final class QuoteSyncJob {
                 }
 
                 String[] stocksArray = stocksArrayList.toArray(new String[stocksArrayList.size()]);
-                Map<String, Stock> quotes = YahooFinance.get(stocksArray, from, to, Interval
-                        .WEEKLY);
-                for (String symbol : stocksArray) {
-                    ContentValues quoteCV = new ContentValues();
-                    Stock stock = quotes.get(symbol);
-                    StockQuote quote = stock.getQuote();
-                    BigDecimal price = quote.getPrice();
-                    BigDecimal change = quote.getChange();
-                    BigDecimal percentChange = quote.getChangeInPercent();
+                if (stocksArray != null && stocksArray.length > 0) {
+                    Map<String, Stock> quotes = YahooFinance.get(stocksArray, from, to, Interval
+                            .WEEKLY);
+                    for (String symbol : stocksArray) {
+                        ContentValues quoteCV = new ContentValues();
+                        Stock stock = quotes.get(symbol);
+                        StockQuote quote = stock.getQuote();
+                        BigDecimal price = quote.getPrice();
+                        BigDecimal change = quote.getChange();
+                        BigDecimal percentChange = quote.getChangeInPercent();
 
-                    List<HistoricalQuote> history = stock.getHistory();
-                    StringBuilder historyBuilder = new StringBuilder();
+                        List<HistoricalQuote> history = stock.getHistory();
+                        StringBuilder historyBuilder = new StringBuilder();
 
-                    for (HistoricalQuote it : history) {
-                        historyBuilder.append(it.getDate().getTimeInMillis());
-                        historyBuilder.append("&");
-                        historyBuilder.append(it.getClose().floatValue());
-                        historyBuilder.append("\n");
+                        for (HistoricalQuote it : history) {
+                            historyBuilder.append(it.getDate().getTimeInMillis());
+                            historyBuilder.append("&");
+                            historyBuilder.append(it.getClose().floatValue());
+                            historyBuilder.append("\n");
+                        }
+                        quoteCV.put(Contract.Quote.COLUMN_TYPE, Constants.StockType.KNOWN);
+                        quoteCV.put(Contract.Quote.COLUMN_PRICE, price.floatValue());
+                        quoteCV.put(Contract.Quote.COLUMN_PERCENTAGE_CHANGE, change
+                                .floatValue());
+                        quoteCV.put(Contract.Quote.COLUMN_ABSOLUTE_CHANGE, percentChange
+                                .floatValue());
+                        quoteCV.put(Contract.Quote.COLUMN_HISTORY, historyBuilder.toString());
+                        context.getContentResolver().update(Contract.Quote.URI, quoteCV,
+                                Contract.Quote.COLUMN_SYMBOL + "=?", new String[]{symbol});
                     }
-                    quoteCV.put(Contract.Quote.COLUMN_TYPE, Constants.StockType.KNOWN);
-                    quoteCV.put(Contract.Quote.COLUMN_PRICE, price.floatValue());
-                    quoteCV.put(Contract.Quote.COLUMN_PERCENTAGE_CHANGE, change
-                            .floatValue());
-                    quoteCV.put(Contract.Quote.COLUMN_ABSOLUTE_CHANGE, percentChange
-                            .floatValue());
-                    quoteCV.put(Contract.Quote.COLUMN_HISTORY, historyBuilder.toString());
-                    context.getContentResolver().update(Contract.Quote.URI, quoteCV,
-                            Contract.Quote.COLUMN_SYMBOL + "=?", new String[]{symbol});
                 }
-
-
             }
+            Utils.updateWidgets(context);
+
             Intent broadcastIntent = new Intent();
             broadcastIntent.setAction(Constants.Action.ACTION_SYNC_END);
             broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,

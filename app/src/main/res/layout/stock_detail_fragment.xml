@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
-              android:id="@+id/details_main"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
-              android:visibility="gone"
               android:weightSum="8"
               tools:context=".ui.StockDetailFragment">
+
+    <TextView
+        android:id="@+id/empty_detail_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="8"
+        android:gravity="center"
+        android:text="@string/select_stock_to_display_history"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:visibility="gone"/>
+
 
     <TextView
         android:id="@+id/chart_header"

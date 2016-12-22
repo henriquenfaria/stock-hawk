@@ -17,6 +17,8 @@ public final class Constants {
 
     public static class Action {
         public static final String ACTION_SYNC_END = "com.udacity.stockhawk.ACTION_SYNC_END";
+        public static final String ACTION_UPDATE_WIDGETS =
+                "com.udacity.stockhawk.ACTION_UPDATE_WIDGETS";
     }
 
     public static class Extra {
@@ -32,10 +34,6 @@ public final class Constants {
 
     public static class Chart {
         public static final int CHART_X_ANIMATION_TIME = 2000;
-    }
-
-    public static class Date {
-        public static final long MILLISECONDS_IN_A_WEEK =  24*60*60*10*10*10*7;
     }
 }
 

@@ -1,13 +1,17 @@
 package com.udacity.stockhawk.widget;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.TaskStackBuilder;
 import android.widget.RemoteViews;
 
 import com.udacity.stockhawk.R;
+import com.udacity.stockhawk.ui.StockDetailActivity;
+import com.udacity.stockhawk.ui.StockListActivity;
 import com.udacity.stockhawk.utils.Constants;
 
 public class StockWidgetProvider extends AppWidgetProvider {
@@ -19,23 +23,28 @@ public class StockWidgetProvider extends AppWidgetProvider {
         for (int appWidgetId : appWidgetIds) {
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
 
-            // Create an Intent to launch MainActivity
-            // Intent intent = new Intent(context, MainActivity.class);
-            // PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-            //views.setOnClickPendingIntent(R.id.widget, pendingIntent);
+            // Clicking widget title or empty layout launches StockListActivity
+            Intent intent = new Intent(context, StockListActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+            views.setOnClickPendingIntent(R.id.widget_title, pendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_empty_text, pendingIntent);
 
             views.setRemoteAdapter(R.id.widget_list,
                     new Intent(context, StockWidgetRemoteViewsService.class));
 
+            boolean useDetailActivity = context.getResources()
+                    .getBoolean(R.bool.use_detail_activity);
+            Intent clickIntentTemplate = useDetailActivity
+                    ? new Intent(context, StockDetailActivity.class)
+                    : new Intent(context, StockListActivity.class);
+            PendingIntent clickPendingIntentTemplate = TaskStackBuilder.create(context)
+                    .addNextIntentWithParentStack(clickIntentTemplate)
+                    .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        /*Intent clickIntentTemplate = useDetailActivity
-                ? new Intent(context, DetailActivity.class)
-                : new Intent(context, MainActivity.class);
-        PendingIntent clickPendingIntentTemplate = TaskStackBuilder.create(context)
-                .addNextIntentWithParentStack(clickIntentTemplate)
-                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        views.setPendingIntentTemplate(R.id.widget_list, clickPendingIntentTemplate);
-        views.setEmptyView(R.id.widget_list, R.id.widget_empty);*/
+            views.setPendingIntentTemplate(R.id.widget_list, clickPendingIntentTemplate);
+
+            //TODO: Make empty view?
+            views.setEmptyView(R.id.widget_list, R.id.widget_empty_text);
 
             // Tell the AppWidgetManager to perform an update on the current app widget
             appWidgetManager.updateAppWidget(appWidgetId, views);
@@ -45,11 +54,8 @@ public class StockWidgetProvider extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
-        if (intent != null && Constants.Action.ACTION_SYNC_END.equals(intent.getAction())
-                && intent.hasExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE)) {
-            if (intent.getIntExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
-                    Constants.SyncResultType.RESULT_UNKNOWN)
-                    == Constants.SyncResultType.RESULT_SUCCESS) {
+        if (intent != null) {
+            if (Constants.Action.ACTION_UPDATE_WIDGETS.equals(intent.getAction())) {
                 AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
                 int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
                         new ComponentName(context, getClass()));

@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.animation.Easing;
@@ -43,14 +42,14 @@ public class StockDetailFragment extends Fragment {
     private OnStockDetailFragmentListener mOnStockDetailFragmentListener;
     private Context mContext;
 
-    @BindView(R.id.details_main)
-    LinearLayout mDetailsMain;
-
     @BindView(R.id.chart_header)
     TextView mChartHeader;
 
     @BindView(R.id.stock_chart)
     LineChart mLineChart;
+
+    @BindView(R.id.empty_detail_text)
+    TextView mEmptyDetailText;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -104,12 +103,16 @@ public class StockDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.stock_detail_fragment, container, false);
+        ButterKnife.bind(this, view);
 
         if (mStockSymbol == null && mStockHistory == null) {
+            mEmptyDetailText.setVisibility(View.VISIBLE);
+            mChartHeader.setVisibility(View.GONE);
+            mLineChart.setVisibility(View.GONE);
             return view;
         }
 
-        ButterKnife.bind(this, view);
+
         mChartHeader.setText(getString(R.string.chart_detail_title, mStockSymbol));
         try {
             List<Entry> entries = Utils.createEntryListFromString(mStockHistory);
@@ -118,7 +121,7 @@ public class StockDetailFragment extends Fragment {
             Timber.e(exception, "Error while generating stock chart");
             mLineChart.setNoDataText(getString(R.string.error_stock_history));
         }
-        mDetailsMain.setVisibility(View.VISIBLE);
+
         return view;
     }
 

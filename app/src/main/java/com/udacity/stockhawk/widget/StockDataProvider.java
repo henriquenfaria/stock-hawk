@@ -22,7 +22,6 @@ import java.util.Locale;
 
 public class StockDataProvider implements RemoteViewsService.RemoteViewsFactory {
 
-
     Context mContext = null;
     private Cursor mCursor = null;
     private DecimalFormat mDollarFormatWithPlus;
@@ -52,10 +51,11 @@ public class StockDataProvider implements RemoteViewsService.RemoteViewsFactory 
             mCursor.close();
         }
         final long identityToken = Binder.clearCallingIdentity();
+        // Only KNOWN stocks should be displayed in the collection widget
         mCursor = mContext.getContentResolver().query(Contract.Quote.URI,
                 Contract.Quote.QUOTE_COLUMNS,
-                null,
-                null,
+                Contract.Quote.COLUMN_TYPE + " = ?",
+                new String[]{"" + Constants.StockType.KNOWN},
                 null);
         Binder.restoreCallingIdentity(identityToken);
     }
@@ -82,8 +82,8 @@ public class StockDataProvider implements RemoteViewsService.RemoteViewsFactory 
         RemoteViews views = new RemoteViews(mContext.getPackageName(),
                 R.layout.widget_layout_list_item);
         String symbol = mCursor.getString(mCursor.getColumnIndex(Contract.Quote.COLUMN_SYMBOL));
+        String history = mCursor.getString(mCursor.getColumnIndex(Contract.Quote.COLUMN_HISTORY));
         views.setTextViewText(R.id.symbol, symbol);
-
         int stockType = mCursor.getInt(mCursor.getColumnIndex(Contract.Quote.COLUMN_TYPE));
         switch (stockType) {
             case Constants.StockType.LOADING:
@@ -126,8 +126,16 @@ public class StockDataProvider implements RemoteViewsService.RemoteViewsFactory 
                 } else {
                     views.setTextViewText(R.id.change, percentage);
                 }
+
+                // Add Extra values so we can open the correct stock detail
+                Intent fillInIntent = new Intent();
+                fillInIntent.putExtra(Constants.Extra.EXTRA_STOCK_SYMBOL, symbol);
+                fillInIntent.putExtra(Constants.Extra.EXTRA_STOCK_HISTORY, history);
+                views.setOnClickFillInIntent(R.id.widget_list_item, fillInIntent);
                 break;
         }
+
+
 
         // TODO: Use views.setContentDescription(R.id.widget_icon, description);
         // to set content description here

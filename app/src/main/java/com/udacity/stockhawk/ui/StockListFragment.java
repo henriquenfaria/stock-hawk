@@ -61,7 +61,7 @@ public class StockListFragment extends Fragment implements LoaderManager
     @BindView(error)
     TextView mErrorTextView;
 
-    private StockAdapter adapter;
+    private StockAdapter mAdapter;
     private final SyncEndReceiver mSyncEndReceiver = new SyncEndReceiver();
     private Context mContext;
     private OnStockListFragmentListener mOnStockListFragmentListener;
@@ -146,8 +146,8 @@ public class StockListFragment extends Fragment implements LoaderManager
         ButterKnife.bind(this, view);
 
         firstRunCheck();
-        adapter = new StockAdapter(mContext, this);
-        mRecyclerView.setAdapter(adapter);
+        mAdapter = new StockAdapter(mContext, this);
+        mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mSwipeRefreshLayout.setOnRefreshListener(this);
         onRefresh();
@@ -163,13 +163,14 @@ public class StockListFragment extends Fragment implements LoaderManager
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                String symbol = adapter.getSymbolAtPosition(viewHolder.getAdapterPosition());
+                String symbol = mAdapter.getSymbolAtPosition(viewHolder.getAdapterPosition());
                 //TODO: What about using mContext somehow?
                 getActivity().getContentResolver().delete(Contract.Quote.makeUriForStock(symbol),
                         null, null);
+                Utils.updateWidgets(mContext);
+
             }
         }).attachToRecyclerView(mRecyclerView);
-
 
         mAddButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -196,14 +197,14 @@ public class StockListFragment extends Fragment implements LoaderManager
 
         QuoteSyncJob.syncImmediately(mContext);
 
-        if (!networkUp() && adapter.getItemCount() == 0) {
+        if (!networkUp() && mAdapter.getItemCount() == 0) {
             mSwipeRefreshLayout.setRefreshing(false);
-            mErrorTextView.setText(getString(R.string.error_no_stocks_no_connectivity));
+            mErrorTextView.setText(getString(R.string.error_no_stocks));
             mErrorTextView.setVisibility(View.VISIBLE);
         } else if (!networkUp()) {
             mSwipeRefreshLayout.setRefreshing(false);
             Toast.makeText(mContext, R.string.toast_no_connectivity, Toast.LENGTH_LONG).show();
-        } else if (adapter.getItemCount() == 0) {
+        } else if (mAdapter.getItemCount() == 0) {
             mSwipeRefreshLayout.setRefreshing(false);
             mErrorTextView.setText(getString(R.string.error_no_stocks));
             mErrorTextView.setVisibility(View.VISIBLE);
@@ -257,7 +258,7 @@ public class StockListFragment extends Fragment implements LoaderManager
         if (data != null && data.getCount() != 0) {
             mErrorTextView.setVisibility(View.GONE);
         }
-        adapter.setCursor(data);
+        mAdapter.setCursor(data);
     }
 
 
@@ -265,7 +266,7 @@ public class StockListFragment extends Fragment implements LoaderManager
     public void onLoaderReset(Loader<Cursor> loader) {
         // TODO: Remove?
         //mSwipeRefreshLayout.setRefreshing(false);
-        adapter.setCursor(null);
+        mAdapter.setCursor(null);
     }
 
 
@@ -293,7 +294,7 @@ public class StockListFragment extends Fragment implements LoaderManager
         if (id == R.id.menu_item_change_units) {
             Utils.toggleDisplayMode(mContext);
             setDisplayModeMenuItemIcon(item);
-            adapter.notifyDataSetChanged();
+            mAdapter.notifyDataSetChanged();
             return true;
         }
         return super.onOptionsItemSelected(item);

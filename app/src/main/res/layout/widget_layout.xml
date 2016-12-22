@@ -8,20 +8,33 @@
 
     <TextView
         android:id="@+id/widget_title"
-        style="@android:style/TextAppearance.Medium"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:background="@color/material_blue_700"
-        android:text="@string/app_name"/>
+        android:background="@color/colorPrimary"
+        android:gravity="center"
+        android:text="@string/app_name"
+        android:textSize="25sp"/>
 
     <ListView
         android:id="@+id/widget_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/material_grey_900"
         android:divider="@null"
         android:dividerHeight="0dp"
+        android:listSelector="@android:color/transparent"
         tools:listitem="@layout/widget_layout_list_item"/>
+
+    <TextView
+        android:id="@+id/widget_empty_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:background="@color/material_grey_900"
+        android:gravity="center"
+        android:text="@string/error_no_stocks_widget"
+        android:textAppearance="@android:style/TextAppearance.Medium"/>
 
 </LinearLayout>
 

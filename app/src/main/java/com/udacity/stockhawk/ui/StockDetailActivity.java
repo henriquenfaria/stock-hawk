@@ -29,6 +29,7 @@ public class StockDetailActivity extends AppCompatActivity implements StockDetai
                 if (intent.hasExtra(Constants.Extra.EXTRA_STOCK_HISTORY)) {
                     stockHistory = intent.getStringExtra(Constants.Extra.EXTRA_STOCK_HISTORY);
                 }
+
                 StockDetailFragment detailsFragment = StockDetailFragment
                         .newInstance(stockSymbol, stockHistory);
                 getSupportFragmentManager().beginTransaction()

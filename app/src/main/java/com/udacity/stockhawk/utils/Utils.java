@@ -1,6 +1,7 @@
 package com.udacity.stockhawk.utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -70,5 +71,11 @@ public final class Utils {
         calendar.setTimeInMillis(timeInMilliseconds);
         String date = dateInstance.format(calendar.getTime());
         return date;
+    }
+
+    public static void updateWidgets(Context context) {
+        Intent updateWidgetsIntent = new Intent(Constants.Action.ACTION_UPDATE_WIDGETS)
+                .setPackage(context.getPackageName());
+        context.sendBroadcast(updateWidgetsIntent);
     }
 }
