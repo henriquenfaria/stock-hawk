@@ -1,31 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:id="@+id/widget_list_item"
-              android:layout_width="match_parent"
-              android:layout_height="?android:attr/listPreferredItemHeight"
-              android:gravity="center_vertical"
-              android:orientation="horizontal"
-              android:paddingLeft="10dp"
-              android:paddingRight="10dp"
-              android:weightSum="2">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/widget_list_item"
+                android:layout_width="match_parent"
+                android:layout_height="?android:attr/listPreferredItemHeight"
+                android:gravity="center_vertical"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp">
 
     <TextView
         android:id="@+id/symbol"
-        style="@style/StockSymbolTextStyle"
-        android:layout_width="0dp"
+        style="@style/StockSymbolTextStyleWidget"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_gravity="bottom"
+        android:layout_toLeftOf="@+id/stock_info_layout"
+        android:layout_toStartOf="@+id/stock_info_layout"
         android:ellipsize="end"
-        android:gravity="left|center_vertical"
         android:maxLines="1"
         tools:text="GOOG"/>
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:id="@+id/stock_info_layout"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:gravity="right|center_vertical">
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true">
 
         <LinearLayout
             android:id="@+id/price_change_layout"
@@ -63,4 +65,4 @@
                 tools:text="1000.00"/>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>

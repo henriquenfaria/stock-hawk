@@ -128,6 +128,13 @@ public final class QuoteSyncJob {
             broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
                     Constants.SyncResultType.RESULT_ERROR);
             context.sendBroadcast(broadcastIntent);
+        } catch (StringIndexOutOfBoundsException exception) {
+            Timber.e(exception, "Error fetching stock quotes");
+            Intent broadcastIntent = new Intent();
+            broadcastIntent.setAction(Constants.Action.ACTION_SYNC_END);
+            broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
+                    Constants.SyncResultType.RESULT_ERROR);
+            context.sendBroadcast(broadcastIntent);
         } finally {
             if (cursor != null) {
                 cursor.close();
