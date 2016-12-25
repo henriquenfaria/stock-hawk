@@ -3,8 +3,11 @@ package com.udacity.stockhawk.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.view.View;
 
 import com.github.mikephil.charting.data.Entry;
 import com.udacity.stockhawk.R;
@@ -77,5 +80,15 @@ public final class Utils {
         Intent updateWidgetsIntent = new Intent(Constants.Action.ACTION_UPDATE_WIDGETS)
                 .setPackage(context.getPackageName());
         context.sendBroadcast(updateWidgetsIntent);
+    }
+
+    public static boolean isRTL(Context ctx) {
+        Configuration config = ctx.getResources().getConfiguration();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return config.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+        } else {
+            return false;
+        }
     }
 }
