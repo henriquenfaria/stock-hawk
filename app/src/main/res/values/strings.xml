@@ -33,4 +33,6 @@
     <string name="status_loading_chart_data">Loading chart data...</string>
     <string name="error_stock_history">Error loading stock history.</string>
     <string name="chart_detail_title">%1$s value over the last 12 months</string>
+    <string name="percentage_difference">Percentage difference</string>
+    <string name="dollar_variation">Dollar difference</string>
 </resources>

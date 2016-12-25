@@ -19,6 +19,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import static com.udacity.stockhawk.R.layout.widget_layout_list_item;
+
 
 public class StockDataProvider implements RemoteViewsService.RemoteViewsFactory {
 
@@ -80,7 +82,7 @@ public class StockDataProvider implements RemoteViewsService.RemoteViewsFactory 
             return null;
         }
         RemoteViews views = new RemoteViews(mContext.getPackageName(),
-                R.layout.widget_layout_list_item);
+                widget_layout_list_item);
         String symbol = mCursor.getString(mCursor.getColumnIndex(Contract.Quote.COLUMN_SYMBOL));
         String history = mCursor.getString(mCursor.getColumnIndex(Contract.Quote.COLUMN_HISTORY));
         views.setTextViewText(R.id.symbol, symbol);
@@ -91,12 +93,16 @@ public class StockDataProvider implements RemoteViewsService.RemoteViewsFactory 
                 views.setViewVisibility(R.id.stock_status_layout, View.VISIBLE);
                 views.setTextViewText(R.id.stock_status_text,
                         mContext.getString(R.string.status_loading));
+                views.setContentDescription(views.getLayoutId(), symbol + " "
+                        + mContext.getString(R.string.status_loading));
                 break;
             case Constants.StockType.UNKNOWN:
                 views.setViewVisibility(R.id.price_change_layout, View.GONE);
                 views.setViewVisibility(R.id.stock_status_layout, View.VISIBLE);
                 views.setTextViewText(R.id.stock_status_text,
                         mContext.getString(R.string.status_unknown_stock));
+                views.setContentDescription(views.getLayoutId(), symbol + " "
+                        + mContext.getString(R.string.status_unknown_stock));
                 break;
             case Constants.StockType.KNOWN:
                 views.setViewVisibility(R.id.price_change_layout, View.VISIBLE);
@@ -123,8 +129,10 @@ public class StockDataProvider implements RemoteViewsService.RemoteViewsFactory 
                 if (Utils.getDisplayMode(mContext)
                         .equals(mContext.getString(R.string.pref_display_mode_absolute_key))) {
                     views.setTextViewText(R.id.change, change);
+                    views.setContentDescription(views.getLayoutId(), symbol + " " + change);
                 } else {
                     views.setTextViewText(R.id.change, percentage);
+                    views.setContentDescription(views.getLayoutId(), symbol + " " + percentage);
                 }
 
                 // Add Extra values so we can open the correct stock detail
@@ -135,8 +143,6 @@ public class StockDataProvider implements RemoteViewsService.RemoteViewsFactory 
                 break;
         }
 
-
-
         // TODO: Use views.setContentDescription(R.id.widget_icon, description);
         // to set content description here
 
@@ -145,7 +151,7 @@ public class StockDataProvider implements RemoteViewsService.RemoteViewsFactory 
 
     @Override
     public RemoteViews getLoadingView() {
-        return new RemoteViews(mContext.getPackageName(), R.layout.widget_layout_list_item);
+        return new RemoteViews(mContext.getPackageName(), widget_layout_list_item);
     }
 
     @Override

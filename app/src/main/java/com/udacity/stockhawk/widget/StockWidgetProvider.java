@@ -42,8 +42,6 @@ public class StockWidgetProvider extends AppWidgetProvider {
                     .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
             views.setPendingIntentTemplate(R.id.widget_list, clickPendingIntentTemplate);
-
-            //TODO: Make empty view?
             views.setEmptyView(R.id.widget_list, R.id.widget_empty_text);
 
             // Tell the AppWidgetManager to perform an update on the current app widget

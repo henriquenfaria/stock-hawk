@@ -1,6 +1,5 @@
 package com.udacity.stockhawk.ui;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -14,9 +13,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -154,7 +151,6 @@ public class StockListFragment extends Fragment implements LoaderManager
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mSwipeRefreshLayout.setOnRefreshListener(this);
         onRefresh();
-        //TODO: What about using mContext somehow?
         getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
@@ -167,7 +163,6 @@ public class StockListFragment extends Fragment implements LoaderManager
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 String symbol = mAdapter.getSymbolAtPosition(viewHolder.getAdapterPosition());
-                //TODO: What about using mContext somehow?
                 getActivity().getContentResolver().delete(Contract.Quote.makeUriForStock(symbol),
                         null, null);
                 Utils.updateWidgets(mContext);
@@ -185,6 +180,7 @@ public class StockListFragment extends Fragment implements LoaderManager
 
             }
         });
+        mAddButton.setContentDescription(mContext.getString(R.string.dialog_title));
 
         return view;
     }
@@ -256,9 +252,6 @@ public class StockListFragment extends Fragment implements LoaderManager
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        // TODO: Remove?
-        //mSwipeRefreshLayout.setRefreshing(false);
-
         if (data != null && data.getCount() != 0) {
             mErrorTextView.setVisibility(View.GONE);
         }
@@ -268,8 +261,6 @@ public class StockListFragment extends Fragment implements LoaderManager
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        // TODO: Remove?
-        //mSwipeRefreshLayout.setRefreshing(false);
         mAdapter.setCursor(null);
     }
 
@@ -278,8 +269,12 @@ public class StockListFragment extends Fragment implements LoaderManager
         if (Utils.getDisplayMode(mContext)
                 .equals(getString(R.string.pref_display_mode_absolute_key))) {
             item.setIcon(R.drawable.ic_percentage);
+            // Setting the title also sets the content description for this menu button
+            item.setTitle(mContext.getString(R.string.percentage_difference));
         } else {
             item.setIcon(R.drawable.ic_dollar);
+            // Setting the title also sets the content description for this menu button
+            item.setTitle(mContext.getString(R.string.percentage_difference));
         }
     }
 
@@ -288,7 +283,6 @@ public class StockListFragment extends Fragment implements LoaderManager
         inflater.inflate(R.menu.stock_list_fragment_menu, menu);
         MenuItem item = menu.findItem(R.id.menu_item_change_units);
         setDisplayModeMenuItemIcon(item);
-
     }
 
     @Override

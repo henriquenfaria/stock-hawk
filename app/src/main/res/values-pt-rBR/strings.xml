@@ -19,4 +19,6 @@
     <string name="status_loading_chart_data">Carregando gráfico...</string>
     <string name="error_stock_history">Erro ao carregar o histórico da ação.</string>
     <string name="chart_detail_title">Valor da %1$s nos últimos 12 meses</string>
+    <string name="percentage_difference">Diferença em porcentagem</string>
+    <string name="dollar_variation">Difarença em dólares</string>
 </resources>

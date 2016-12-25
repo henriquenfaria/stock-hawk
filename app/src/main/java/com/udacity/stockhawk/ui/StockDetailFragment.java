@@ -170,12 +170,8 @@ public class StockDetailFragment extends Fragment {
             }
         });
 
-        //TODO: Enable pinch zoom?
         mLineChart.setScaleEnabled(false);
-
-        //TODO: Need to test on other resolutions
         mLineChart.setExtraOffsets(5f, 0, 30f, 0);
-
         mLineChart.setData(lineData);
         mLineChart.setDrawMarkers(true);
         mLineChart.setMarker(new StockMarkerView(mContext, R.layout.stock_marker_layout));
