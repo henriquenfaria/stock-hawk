@@ -7,12 +7,12 @@
 
     <TextView
         android:id="@+id/marker_content"
-        android:layout_width="80dp"
+        android:layout_width="@dimen/stock_marker_layout_marker_width"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
+        android:layout_marginBottom="@dimen/stock_marker_layout_marker_margin_bottom"
         android:gravity="center"
         android:lines="2"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@android:color/white"
-        android:textSize="10dp"/>
+        android:textSize="@dimen/stock_marker_layout_marker_text_size"/>
 </LinearLayout>

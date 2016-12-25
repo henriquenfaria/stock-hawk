@@ -34,12 +34,12 @@
         android:layout_gravity="bottom|right|end"
         android:src="@drawable/fab_plus"
         app:backgroundTint="@color/material_blue_700"
-        app:borderWidth="0dp"
-        app:elevation="6dp"
+        app:borderWidth="@dimen/stock_list_fragment_floating_border"
+        app:elevation="@dimen/stock_list_fragment_floating_elevation"
         app:fabSize="normal"
         app:layout_anchor="@id/main_layout"
         app:layout_anchorGravity="bottom|right|end"
-        app:pressedTranslationZ="12dp"/>
+        app:pressedTranslationZ="@dimen/stock_list_fragment_floating_translation_z"/>
 
     <TextView
         android:id="@+id/error"
