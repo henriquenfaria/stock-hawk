@@ -143,9 +143,6 @@ public class StockDataProvider implements RemoteViewsService.RemoteViewsFactory 
                 break;
         }
 
-        // TODO: Use views.setContentDescription(R.id.widget_icon, description);
-        // to set content description here
-
         return views;
     }
 

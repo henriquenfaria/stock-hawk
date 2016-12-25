@@ -1,6 +1,7 @@
 <resources>
     <dimen name="activity_padding">16dp</dimen>
-    <dimen name="add_stock_dialog_margin">4dp</dimen>
+    <dimen name="add_stock_dialog_margin">6dp</dimen>
+    <dimen name="add_stock_dialog_margin_top">15dp</dimen>
     <dimen name="list_item_quote_main_padding">10dp</dimen>
     <dimen name="list_item_quote_price_margin_end">10dp</dimen>
     <dimen name="list_item_quote_change_padding_start">3dp</dimen>
