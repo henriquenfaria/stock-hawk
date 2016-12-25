@@ -1,0 +1,22 @@
+<resources>
+    <string name="dialog_title">Adicionar ação</string>
+    <string name="dialog_hint">Apenas letras e dígitos (ex: GOOG)</string>
+    <string name="dialog_cancel">Cancelar</string>
+    <string name="dialog_add">Adicionar</string>
+    <string name="error_stock_not_found">Ação %s é inválida!</string>
+    <string name="error_no_stocks">Nenhuma ação adicionada! Pressione o botão flutuante para adicionar uma ação nova.</string>
+    <string name="error_no_stocks_widget">Sem ações válidas para exibir. Clique aqui para adicionar.</string>
+    <string name="toast_stock_added_no_connectivity">Ação %s adicionada. Valor será atualizado assim que uma conexão com a internet estiver disponível.</string>
+    <string name="toast_no_connectivity">Sem conexão com a internet. Não é possível atualizar informações das ações.</string>
+    <string name="toast_no_please_check_connectivity">Por favor, verifique sua conexão com a internet.</string>
+    <string name="toast_sync_error_try_again">Erros durante a atualização das ações. Por favor, tente novamente!</string>
+    <string name="toast_sync_success">Atualizado com sucesso.</string>
+    <string name="status_loading">Carregando...</string>
+    <string name="status_unknown_stock">Inválida</string>
+    <string name="select_stock_to_display_history">Seleciona uma ação para exibir dos detalhes de seu histórico.</string>
+    <string name="unknown_stock_no_details">Ação inválida, sem detalhes para exibir.</string>
+    <string name="loading_stock_please_wait">Carregando ação, favor esperar...</string>
+    <string name="status_loading_chart_data">Carregando gráfico...</string>
+    <string name="error_stock_history">Erro ao carregar o histórico da ação.</string>
+    <string name="chart_detail_title">Valor da %1$s nos últimos 12 meses</string>
+</resources>

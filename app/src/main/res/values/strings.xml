@@ -13,7 +13,6 @@
     <string name="pref_display_mode_percentage_key" translatable="false">percentage</string>
     <string name="pref_version_code" translatable="false">versionCode</string>
 
-    <string name="pref_display_mode_title">Display Mode</string>
     <string name="dialog_title">Add Stock</string>
     <string name="dialog_hint">Only letters and digits (e.g. GOOG)</string>
     <string name="dialog_cancel">Cancel</string>
@@ -27,11 +26,11 @@
     <string name="toast_sync_error_try_again">Error while syncing stocks. Please, try again!</string>
     <string name="toast_sync_success">Successfully synced</string>
     <string name="status_loading">Loading...</string>
-    <string name="status_unknown_stock">Unknown</string>
-    <string name="select_stock_to_display_history">Select a stock to display its history</string>
-    <string name="unknown_stock_no_details">Unknown stock, no details to show...</string>
+    <string name="status_unknown_stock">Invalid</string>
+    <string name="select_stock_to_display_history">Select a stock to display its history.</string>
+    <string name="unknown_stock_no_details">Invalid stock, no details to show...</string>
     <string name="loading_stock_please_wait">Loading stock, please wait...</string>
     <string name="status_loading_chart_data">Loading chart data...</string>
-    <string name="error_stock_history">Error loading stock history</string>
+    <string name="error_stock_history">Error loading stock history.</string>
     <string name="chart_detail_title">%1$s value over the last 12 months</string>
 </resources>
