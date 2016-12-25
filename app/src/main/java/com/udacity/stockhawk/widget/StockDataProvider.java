@@ -37,10 +37,11 @@ public class StockDataProvider implements RemoteViewsService.RemoteViewsFactory 
 
     @Override
     public void onCreate() {
-        mDollarFormat = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.getDefault());
-        mDollarFormatWithPlus = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale
-                .getDefault());
+        mDollarFormat = (DecimalFormat) NumberFormat.getInstance(Locale.getDefault());
+        mDollarFormat.setPositivePrefix("$");
+        mDollarFormatWithPlus = (DecimalFormat) NumberFormat.getInstance(Locale.getDefault());
         mDollarFormatWithPlus.setPositivePrefix("+$");
+        mDollarFormatWithPlus.setNegativePrefix("-$");
         mPercentageFormat = (DecimalFormat) NumberFormat.getPercentInstance(Locale.getDefault());
         mPercentageFormat.setMaximumFractionDigits(2);
         mPercentageFormat.setMinimumFractionDigits(2);
