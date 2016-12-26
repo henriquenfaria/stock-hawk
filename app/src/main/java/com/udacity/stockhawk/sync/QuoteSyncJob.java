@@ -38,7 +38,7 @@ public final class QuoteSyncJob {
     private static final int PERIOD_SYNC = 30;
     private static final int PERIOD_HISTORY = 1;
 
-    static void getQuotes(Context context) {
+    static void getQuotes(Context context, boolean fromWidget) {
 
         Timber.d("Running sync job");
 
@@ -118,6 +118,9 @@ public final class QuoteSyncJob {
 
             Intent broadcastIntent = new Intent();
             broadcastIntent.setAction(Constants.Action.ACTION_SYNC_END);
+            if (fromWidget) {
+                broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_FROM_WIDGET, true);
+            }
             broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
                     Constants.SyncResultType.RESULT_SUCCESS);
             context.sendBroadcast(broadcastIntent);
@@ -125,6 +128,9 @@ public final class QuoteSyncJob {
             Timber.e(exception, "Error fetching stock quotes");
             Intent broadcastIntent = new Intent();
             broadcastIntent.setAction(Constants.Action.ACTION_SYNC_END);
+            if (fromWidget) {
+                broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_FROM_WIDGET, true);
+            }
             broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
                     Constants.SyncResultType.RESULT_ERROR);
             context.sendBroadcast(broadcastIntent);
@@ -132,6 +138,9 @@ public final class QuoteSyncJob {
             Timber.e(exception, "Error fetching stock quotes");
             Intent broadcastIntent = new Intent();
             broadcastIntent.setAction(Constants.Action.ACTION_SYNC_END);
+            if (fromWidget) {
+                broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_FROM_WIDGET, true);
+            }
             broadcastIntent.putExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
                     Constants.SyncResultType.RESULT_ERROR);
             context.sendBroadcast(broadcastIntent);

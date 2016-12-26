@@ -6,15 +6,35 @@
               android:orientation="vertical"
               android:padding="@dimen/widget_layout_padding">
 
-    <TextView
-        android:id="@+id/widget_title"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:background="@color/colorPrimary"
-        android:gravity="center"
-        android:text="@string/app_name"
-        android:textAppearance="@android:style/TextAppearance.Large"/>
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:background="@color/colorPrimary"
+            android:gravity="center"
+            android:text="@string/app_name"
+            android:textAppearance="@android:style/TextAppearance.Large"/>
+
+        <ImageButton
+            android:id="@+id/sync"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/widget_title"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/widget_title"
+            android:layout_marginEnd="@dimen/widget_layout_sync_margin_end"
+            android:layout_marginRight="@dimen/widget_layout_sync_margin_end"
+            android:background="@null"
+            android:src="@drawable/ic_action_refresh"/>
+
+    </RelativeLayout>
+
 
     <ListView
         android:id="@+id/widget_list"

@@ -149,7 +149,6 @@ public class StockDataProvider implements RemoteViewsService.RemoteViewsFactory 
                 views.setOnClickFillInIntent(R.id.widget_list_item, fillInIntent);
                 break;
         }
-
         return views;
     }
 

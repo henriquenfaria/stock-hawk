@@ -25,6 +25,7 @@ public final class Constants {
         public static final String EXTRA_STOCK_SYMBOL = "extra_stock_symbol";
         public static final String EXTRA_STOCK_HISTORY = "extra_stock_history";
         public static final String EXTRA_SYNC_RESULT_TYPE = "extra_sync_result_type";
+        public static final String EXTRA_SYNC_FROM_WIDGET = "extra_sync_from_widget";
 
     }
 

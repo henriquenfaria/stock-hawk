@@ -10,7 +10,8 @@
     <string name="toast_no_connectivity">Sem conexão com a internet. Não é possível atualizar informações das ações.</string>
     <string name="toast_no_please_check_connectivity">Por favor, verifique sua conexão com a internet.</string>
     <string name="toast_sync_error_try_again">Erros durante a atualização das ações. Por favor, tente novamente!</string>
-    <string name="toast_sync_success">Atualizado com sucesso.</string>
+    <string name="toast_sync_success">Ações atualizadas com sucesso</string>
+    <string name="toast_syncing">Sincronizando ações...</string>
     <string name="status_loading">Carregando...</string>
     <string name="status_unknown_stock">Inválida</string>
     <string name="select_stock_to_display_history">Seleciona uma ação para exibir dos detalhes de seu histórico.</string>

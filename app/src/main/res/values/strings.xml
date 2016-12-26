@@ -24,7 +24,8 @@
     <string name="toast_no_connectivity">No internet connection. Unable to fetch stocks info.</string>
     <string name="toast_no_please_check_connectivity">Please, check your internet connection.</string>
     <string name="toast_sync_error_try_again">Error while syncing stocks. Please, try again!</string>
-    <string name="toast_sync_success">Successfully synced</string>
+    <string name="toast_sync_success">Stocks successfully synced</string>
+    <string name="toast_syncing">Syncing stocks...</string>
     <string name="status_loading">Loading...</string>
     <string name="status_unknown_stock">Invalid</string>
     <string name="select_stock_to_display_history">Select a stock to display its history.</string>

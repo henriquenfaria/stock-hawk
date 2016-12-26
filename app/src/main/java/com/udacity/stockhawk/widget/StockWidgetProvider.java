@@ -8,8 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.TaskStackBuilder;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import com.udacity.stockhawk.R;
+import com.udacity.stockhawk.sync.QuoteIntentService;
 import com.udacity.stockhawk.ui.StockDetailActivity;
 import com.udacity.stockhawk.ui.StockListActivity;
 import com.udacity.stockhawk.utils.Constants;
@@ -28,6 +30,12 @@ public class StockWidgetProvider extends AppWidgetProvider {
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
             views.setOnClickPendingIntent(R.id.widget_title, pendingIntent);
             views.setOnClickPendingIntent(R.id.widget_empty_text, pendingIntent);
+            // Setting sync button intent
+            Intent syncIntent = new Intent(context, QuoteIntentService.class);
+            syncIntent.putExtra(Constants.Extra.EXTRA_SYNC_FROM_WIDGET, true);
+            PendingIntent syncPendingIntent = PendingIntent.getService(
+                    context, 0, syncIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            views.setOnClickPendingIntent(R.id.sync, syncPendingIntent);
 
             views.setRemoteAdapter(R.id.widget_list,
                     new Intent(context, StockWidgetRemoteViewsService.class));
@@ -58,6 +66,26 @@ public class StockWidgetProvider extends AppWidgetProvider {
                 int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
                         new ComponentName(context, getClass()));
                 appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_list);
+            } else if (Constants.Action.ACTION_SYNC_END.equals(intent.getAction())) {
+                if (intent.hasExtra(Constants.Extra.EXTRA_SYNC_FROM_WIDGET)) {
+                    // TODO: Stop sync animation
+
+                    if (intent.hasExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE)) {
+                        int syncResult = intent.getIntExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
+                                Constants.SyncResultType.RESULT_UNKNOWN);
+                        switch (syncResult) {
+                            case Constants.SyncResultType.RESULT_SUCCESS:
+                                Toast.makeText(context, R.string.toast_sync_success, Toast
+                                        .LENGTH_SHORT).show();
+                                break;
+
+                            case Constants.SyncResultType.RESULT_ERROR:
+                                Toast.makeText(context, R.string.toast_sync_error_try_again, Toast
+                                        .LENGTH_SHORT).show();
+                                break;
+                        }
+                    }
+                }
             }
         }
     }

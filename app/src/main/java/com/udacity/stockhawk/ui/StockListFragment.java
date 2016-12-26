@@ -120,7 +120,7 @@ public class StockListFragment extends Fragment implements LoaderManager
         super.onResume();
         if (mSyncEndReceiver != null) {
             mContext.registerReceiver(mSyncEndReceiver, new IntentFilter(Constants.Action
-                            .ACTION_SYNC_END));
+                    .ACTION_SYNC_END));
         }
     }
 
@@ -369,7 +369,7 @@ public class StockListFragment extends Fragment implements LoaderManager
                             break;
                         case Constants.SyncResultType.RESULT_ERROR:
                             Toast.makeText(context, R.string.toast_sync_error_try_again, Toast
-                                    .LENGTH_LONG).show();
+                                    .LENGTH_SHORT).show();
                             break;
                         default:
                             break;
