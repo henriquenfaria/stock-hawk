@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right|end"
         android:src="@drawable/fab_plus"
-        app:backgroundTint="@color/material_blue_700"
+        app:backgroundTint="@color/colorAccent"
         app:borderWidth="@dimen/stock_list_fragment_floating_border"
         app:elevation="@dimen/stock_list_fragment_floating_elevation"
         app:fabSize="normal"
