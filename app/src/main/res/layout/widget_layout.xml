@@ -4,7 +4,7 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
-              android:padding="4dp">
+              android:padding="@dimen/widget_layout_padding">
 
     <TextView
         android:id="@+id/widget_title"
@@ -24,6 +24,7 @@
         android:divider="@null"
         android:dividerHeight="0dp"
         android:listSelector="@android:color/transparent"
+        android:paddingTop="@dimen/widget_layout_widget_list_padding_top"
         tools:listitem="@layout/widget_layout_list_item"/>
 
     <TextView

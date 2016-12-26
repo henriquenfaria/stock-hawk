@@ -11,6 +11,8 @@
     <dimen name="stock_marker_layout_marker_width">80dp</dimen>
     <dimen name="stock_marker_layout_marker_margin_bottom">5dp</dimen>
     <dimen name="stock_marker_layout_marker_text_size">10sp</dimen>
+    <dimen name="widget_layout_padding">4dp</dimen>
+    <dimen name="widget_layout_widget_list_padding_top">15dp</dimen>
     <dimen name="widget_layout_list_main_padding">10dp</dimen>
     <dimen name="widget_layout_list_price_margin_end">10dp</dimen>
     <dimen name="widget_layout_list_change_padding_start">3dp</dimen>
