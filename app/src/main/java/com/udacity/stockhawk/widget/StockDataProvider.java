@@ -40,16 +40,19 @@ public class StockDataProvider implements RemoteViewsService.RemoteViewsFactory 
         mDollarFormat = (DecimalFormat) NumberFormat.getNumberInstance(Locale.getDefault());
         mDollarFormat.setMinimumIntegerDigits(1);
         mDollarFormat.setMinimumFractionDigits(2);
+        mDollarFormat.setMaximumFractionDigits(2);
         mDollarFormat.setPositivePrefix("$");
         mDollarFormat.setNegativePrefix("$");
         mDollarFormatWithPlus = (DecimalFormat) NumberFormat.getNumberInstance(Locale.getDefault());
         mDollarFormatWithPlus.setMinimumIntegerDigits(1);
         mDollarFormatWithPlus.setMinimumFractionDigits(2);
+        mDollarFormatWithPlus.setMaximumFractionDigits(2);
         mDollarFormatWithPlus.setPositivePrefix("+$");
         mDollarFormatWithPlus.setNegativePrefix("-$");
         mPercentageFormat = (DecimalFormat) NumberFormat.getPercentInstance(Locale.getDefault());
         mPercentageFormat.setMaximumFractionDigits(2);
         mPercentageFormat.setMinimumFractionDigits(2);
+        mPercentageFormat.setMaximumFractionDigits(2);
         mPercentageFormat.setPositivePrefix("+");
         mPercentageFormat.setNegativePrefix("-");
     }
