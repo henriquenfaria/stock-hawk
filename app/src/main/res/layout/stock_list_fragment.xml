@@ -47,6 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
+        android:text="@string/error_no_stocks"
         android:textAppearance="@android:style/TextAppearance.Medium"
         android:visibility="gone"
         app:layout_anchor="@id/main_layout"

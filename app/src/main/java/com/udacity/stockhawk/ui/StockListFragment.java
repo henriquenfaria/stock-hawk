@@ -197,17 +197,12 @@ public class StockListFragment extends Fragment implements LoaderManager
 
         QuoteSyncJob.syncImmediately(mContext);
 
-        if (!networkUp() && mAdapter.getItemCount() == 0) {
+        if (mAdapter.getItemCount() == 0) {
             mSwipeRefreshLayout.setRefreshing(false);
-            mErrorTextView.setText(getString(R.string.error_no_stocks));
             mErrorTextView.setVisibility(View.VISIBLE);
         } else if (!networkUp()) {
             mSwipeRefreshLayout.setRefreshing(false);
             Toast.makeText(mContext, R.string.toast_no_connectivity, Toast.LENGTH_LONG).show();
-        } else if (mAdapter.getItemCount() == 0) {
-            mSwipeRefreshLayout.setRefreshing(false);
-            mErrorTextView.setText(getString(R.string.error_no_stocks));
-            mErrorTextView.setVisibility(View.VISIBLE);
         } else {
             mErrorTextView.setVisibility(View.GONE);
         }
@@ -250,11 +245,22 @@ public class StockListFragment extends Fragment implements LoaderManager
                 null, null, Contract.Quote.COLUMN_SYMBOL);
     }
 
+
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (data != null && data.getCount() != 0) {
-            mErrorTextView.setVisibility(View.GONE);
+
+        if (data != null && mErrorTextView != null) {
+            if (data.getCount() != 0) {
+                mErrorTextView.setVisibility(View.GONE);
+            } else {
+                mErrorTextView.setVisibility(View.VISIBLE);
+            }
         }
+
+        if (mSwipeRefreshLayout != null) {
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
+
         mAdapter.setCursor(data);
     }
 
