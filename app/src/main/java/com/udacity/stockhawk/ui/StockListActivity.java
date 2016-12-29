@@ -62,7 +62,8 @@ public class StockListActivity extends AppCompatActivity implements StockListFra
                         Toast.LENGTH_LONG).show();
                 break;
             case Constants.StockType.KNOWN:
-                QuoteSyncJob.stopSyncJob(this);
+                QuoteSyncJob.stopSyncJob(this, QuoteSyncJob.JOB_TAG_ONE_OFF);
+                QuoteSyncJob.stopSyncJob(this, QuoteSyncJob.JOB_TAG_PERIODIC);
                 if (mIsTwoPane) {
                     StockDetailFragment stockDetailFragment = StockDetailFragment
                             .newInstance(symbol, history);

@@ -16,9 +16,26 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:background="@color/colorPrimary"
-            android:gravity="center"
+            android:gravity="start|left"
+            android:maxLines="1"
+            android:paddingLeft="@dimen/widget_layout_title_padding_start"
+            android:paddingStart="@dimen/widget_layout_title_padding_start"
             android:text="@string/app_name"
             android:textAppearance="@android:style/TextAppearance.Large"/>
+
+        <TextView
+            android:id="@+id/last_update"
+            style="@style/LastUpdateWidget"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/widget_title"
+            android:layout_marginEnd="@dimen/widget_layout_last_update_margin_end"
+            android:layout_marginStart="@dimen/widget_layout_last_update_margin_end"
+            android:layout_toLeftOf="@+id/sync"
+            android:layout_toStartOf="@+id/sync"
+            android:gravity="center_vertical|start|left"
+            android:maxLines="2"
+            android:minLines="2"/>
 
         <ImageButton
             android:id="@+id/sync"

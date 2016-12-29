@@ -102,7 +102,8 @@ public class StockListFragment extends Fragment implements LoaderManager
     @Override
     public void onStart() {
         super.onStart();
-        QuoteSyncJob.initializeSyncJob(mContext);
+        QuoteSyncJob.syncImmediately(mContext, QuoteSyncJob.JOB_TAG_ONE_OFF);
+        QuoteSyncJob.schedulePeriodic(mContext, QuoteSyncJob.JOB_TAG_PERIODIC, QuoteSyncJob.PERIOD_SYNC);
         if (!networkUp()) {
             Toast.makeText(mContext, R.string.toast_no_please_check_connectivity, Toast
                     .LENGTH_LONG).show();
@@ -112,7 +113,8 @@ public class StockListFragment extends Fragment implements LoaderManager
     @Override
     public void onStop() {
         super.onStop();
-        QuoteSyncJob.stopSyncJob(mContext);
+        QuoteSyncJob.stopSyncJob(mContext, QuoteSyncJob.JOB_TAG_ONE_OFF);
+        QuoteSyncJob.stopSyncJob(mContext, QuoteSyncJob.JOB_TAG_PERIODIC);
     }
 
     @Override
@@ -195,7 +197,7 @@ public class StockListFragment extends Fragment implements LoaderManager
     @Override
     public void onRefresh() {
 
-        QuoteSyncJob.syncImmediately(mContext);
+        QuoteSyncJob.syncImmediately(mContext, QuoteSyncJob.JOB_TAG_ONE_OFF);
 
         if (mAdapter.getItemCount() == 0) {
             mSwipeRefreshLayout.setRefreshing(false);
@@ -222,7 +224,7 @@ public class StockListFragment extends Fragment implements LoaderManager
             quoteCV.put(Contract.Quote.COLUMN_SYMBOL, symbol);
             quoteCV.put(Contract.Quote.COLUMN_TYPE, Constants.StockType.LOADING);
             mContext.getContentResolver().insert(Contract.Quote.URI, quoteCV);
-            QuoteSyncJob.syncImmediately(mContext);
+            QuoteSyncJob.syncImmediately(mContext, QuoteSyncJob.JOB_TAG_ONE_OFF);
         }
     }
 
@@ -359,8 +361,9 @@ public class StockListFragment extends Fragment implements LoaderManager
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null) {
-                if (TextUtils.equals(intent.getAction(), Constants.Action.ACTION_SYNC_END) &&
-                        (intent.hasExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE))) {
+                if (TextUtils.equals(intent.getAction(), Constants.Action.ACTION_SYNC_END)
+                        && (intent.hasExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE))
+                        && (intent.hasExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE))) {
 
                     if (mSwipeRefreshLayout != null) {
                         mSwipeRefreshLayout.setRefreshing(false);

@@ -12,11 +12,26 @@ import android.widget.Toast;
 
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.sync.QuoteIntentService;
+import com.udacity.stockhawk.sync.QuoteSyncJob;
 import com.udacity.stockhawk.ui.StockDetailActivity;
 import com.udacity.stockhawk.ui.StockListActivity;
 import com.udacity.stockhawk.utils.Constants;
+import com.udacity.stockhawk.utils.Utils;
 
 public class StockWidgetProvider extends AppWidgetProvider {
+
+    @Override
+    public void onEnabled(Context context) {
+        super.onEnabled(context);
+        QuoteSyncJob.schedulePeriodic(context, QuoteSyncJob.JOB_TAG_PERIODIC_WIDGET,
+                QuoteSyncJob.PERIOD_SYNC_WIDGET);
+    }
+
+    @Override
+    public void onDisabled(Context context) {
+        super.onDisabled(context);
+        QuoteSyncJob.stopSyncJob(context, QuoteSyncJob.JOB_TAG_PERIODIC_WIDGET);
+    }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -52,6 +67,16 @@ public class StockWidgetProvider extends AppWidgetProvider {
             views.setPendingIntentTemplate(R.id.widget_list, clickPendingIntentTemplate);
             views.setEmptyView(R.id.widget_list, R.id.widget_empty_text);
 
+            long lastUpdateMillis = Utils.getLastUpdate(context);
+            if (lastUpdateMillis <= 0) {
+                views.setTextViewText(R.id.last_update,
+                        context.getString(R.string.last_update, "-"));
+            } else {
+                String formattedDate = Utils.formatMillisecondsForLocaleWithTime(lastUpdateMillis);
+                views.setTextViewText(R.id.last_update,
+                        context.getString(R.string.last_update, "\n" + formattedDate));
+            }
+
             // Tell the AppWidgetManager to perform an update on the current app widget
             appWidgetManager.updateAppWidget(appWidgetId, views);
         }
@@ -62,21 +87,24 @@ public class StockWidgetProvider extends AppWidgetProvider {
         super.onReceive(context, intent);
         if (intent != null) {
             if (Constants.Action.ACTION_UPDATE_WIDGETS.equals(intent.getAction())) {
-                AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-                int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
-                        new ComponentName(context, getClass()));
+                ComponentName thisWidget = new ComponentName(context.getApplicationContext(),
+                        StockWidgetProvider.class);
+                AppWidgetManager appWidgetManager = AppWidgetManager
+                        .getInstance(context.getApplicationContext());
+                int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
                 appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_list);
+                if (appWidgetIds != null && appWidgetIds.length > 0) {
+                    onUpdate(context, appWidgetManager, appWidgetIds);
+                }
             } else if (Constants.Action.ACTION_SYNC_END.equals(intent.getAction())) {
                 if (intent.hasExtra(Constants.Extra.EXTRA_SYNC_FROM_WIDGET)) {
                     // TODO: Stop sync animation
-
                     if (intent.hasExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE)) {
                         int syncResult = intent.getIntExtra(Constants.Extra.EXTRA_SYNC_RESULT_TYPE,
                                 Constants.SyncResultType.RESULT_UNKNOWN);
                         switch (syncResult) {
                             case Constants.SyncResultType.RESULT_SUCCESS:
-                                Toast.makeText(context, R.string.toast_sync_success, Toast
-                                        .LENGTH_SHORT).show();
+                                // Do nothing
                                 break;
 
                             case Constants.SyncResultType.RESULT_ERROR:
@@ -86,6 +114,7 @@ public class StockWidgetProvider extends AppWidgetProvider {
                         }
                     }
                 }
+                // TODO: Create receiver to start sync button animation
             }
         }
     }

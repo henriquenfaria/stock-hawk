@@ -36,5 +36,9 @@ public final class Constants {
     public static class Chart {
         public static final int CHART_X_ANIMATION_TIME = 2000;
     }
+
+    public static class Pref {
+        public static final String PREFERENCE_LAST_UPDATE = "preference_last_update";
+    }
 }
 

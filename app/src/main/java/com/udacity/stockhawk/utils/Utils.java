@@ -76,6 +76,16 @@ public final class Utils {
         return date;
     }
 
+    public static String formatMillisecondsForLocaleWithTime(long timeInMilliseconds) {
+        SimpleDateFormat dateInstance = (SimpleDateFormat) DateFormat.getDateTimeInstance(
+                DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timeInMilliseconds);
+        String date = dateInstance.format(calendar.getTime());
+        return date;
+    }
+
+
     public static void updateWidgets(Context context) {
         Intent updateWidgetsIntent = new Intent(Constants.Action.ACTION_UPDATE_WIDGETS)
                 .setPackage(context.getPackageName());
@@ -90,5 +100,18 @@ public final class Utils {
         } else {
             return false;
         }
+    }
+
+    public static void saveLastUpdate(Context context, long time) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putLong(Constants.Pref.PREFERENCE_LAST_UPDATE, time);
+        editor.commit();
+
+    }
+
+    public static long getLastUpdate(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getLong(Constants.Pref.PREFERENCE_LAST_UPDATE, 0);
     }
 }

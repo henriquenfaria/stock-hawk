@@ -35,4 +35,8 @@
         <item name="android:textSize">19sp</item>
         <item name="android:textAllCaps">true</item>
     </style>
+
+    <style name="LastUpdateWidget">
+        <item name="android:textSize">8sp</item>
+    </style>
 </resources>

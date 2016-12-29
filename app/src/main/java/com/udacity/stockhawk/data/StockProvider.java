@@ -26,7 +26,6 @@ public class StockProvider extends ContentProvider {
         return matcher;
     }
 
-
     @Override
     public boolean onCreate() {
         dbHelper = new DbHelper(getContext());

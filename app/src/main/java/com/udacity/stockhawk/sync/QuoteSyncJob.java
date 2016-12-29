@@ -33,10 +33,13 @@ import yahoofinance.quotes.stock.StockQuote;
 
 public final class QuoteSyncJob {
 
-    private static final String JOB_TAG_ONE_OFF = "job_tag_one_off";
-    private static final String JOB_TAG_PERIODIC = "job_tag_periodic";
-    private static final int PERIOD_SYNC = 30;
-    private static final int PERIOD_HISTORY = 1;
+    public static final String JOB_TAG_ONE_OFF = "job_tag_one_off";
+    public static final String JOB_TAG_PERIODIC = "job_tag_periodic";
+    public static final String JOB_TAG_PERIODIC_WIDGET = "job_tag_periodic_widget";
+    public static final int PERIOD_SYNC_WIDGET = 7200;  // 2 hours
+    public static final int PERIOD_SYNC = 30; // 30 seconds
+    private static final int PERIOD_HISTORY = 1; // 1 year
+
 
     static void getQuotes(Context context, boolean fromWidget) {
 
@@ -114,6 +117,7 @@ public final class QuoteSyncJob {
                     }
                 }
             }
+            Utils.saveLastUpdate(context, Calendar.getInstance().getTimeInMillis());
             Utils.updateWidgets(context);
 
             Intent broadcastIntent = new Intent();
@@ -151,16 +155,16 @@ public final class QuoteSyncJob {
         }
     }
 
-    private static void schedulePeriodic(Context context) {
-        Timber.d("Scheduling a periodic sync every " + PERIOD_SYNC + " seconds");
+    public static void schedulePeriodic(Context context, String tag, int period) {
+        Timber.d("Scheduling a periodic sync every " + period + " seconds");
 
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(context));
 
         Job myJob = dispatcher.newJobBuilder()
                 .setService(QuoteJobService.class)
-                .setTag(JOB_TAG_PERIODIC)
+                .setTag(tag)
                 .setRecurring(true)
-                .setTrigger(Trigger.executionWindow(PERIOD_SYNC, PERIOD_SYNC))
+                .setTrigger(Trigger.executionWindow(period, period))
                 .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
                 .setConstraints(Constraint.ON_ANY_NETWORK)
                 .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
@@ -170,7 +174,7 @@ public final class QuoteSyncJob {
         dispatcher.mustSchedule(myJob);
     }
 
-    synchronized public static void syncImmediately(Context context) {
+    synchronized public static void syncImmediately(Context context, String tag) {
         Timber.d("Scheduling a immediate sync");
 
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver
@@ -179,7 +183,7 @@ public final class QuoteSyncJob {
         Bundle bundle = new Bundle();
         Job myJob = dispatcher.newJobBuilder()
                 .setService(QuoteJobService.class)
-                .setTag(JOB_TAG_ONE_OFF)
+                .setTag(tag)
                 .setExtras(bundle)
                 .setRecurring(false)
                 .setTrigger(Trigger.executionWindow(0, 0))
@@ -193,16 +197,9 @@ public final class QuoteSyncJob {
 
     }
 
-    synchronized public static void initializeSyncJob(final Context context) {
-        schedulePeriodic(context);
-        syncImmediately(context);
-    }
-
-    synchronized public static void stopSyncJob(final Context context) {
+    synchronized public static void stopSyncJob(final Context context, String tag) {
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver
                 (context));
-
-        dispatcher.cancel(JOB_TAG_ONE_OFF);
-        dispatcher.cancel(JOB_TAG_PERIODIC);
+        dispatcher.cancel(tag);
     }
 }

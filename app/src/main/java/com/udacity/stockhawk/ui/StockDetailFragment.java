@@ -133,7 +133,6 @@ public class StockDetailFragment extends Fragment {
         dataSet.setDrawValues(false);
         dataSet.setDrawCircles(false);
         dataSet.setDrawFilled(true);
-        //TODO: Create chart colors inside colors.xml
         dataSet.setColor(Color.GREEN);
         dataSet.setFillColor(Color.GREEN);
         dataSet.setHighlightEnabled(true);

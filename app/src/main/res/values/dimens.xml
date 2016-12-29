@@ -13,6 +13,8 @@
     <dimen name="stock_marker_layout_marker_text_size">10sp</dimen>
     <dimen name="widget_layout_padding">4dp</dimen>
     <dimen name="widget_layout_sync_margin_end">5dp</dimen>
+    <dimen name="widget_layout_title_padding_start">5dp</dimen>
+    <dimen name="widget_layout_last_update_margin_end">5dp</dimen>
     <dimen name="widget_layout_widget_list_padding_top">15dp</dimen>
     <dimen name="widget_layout_list_main_padding">10dp</dimen>
     <dimen name="widget_layout_list_price_margin_end">10dp</dimen>
