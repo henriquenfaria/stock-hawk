@@ -38,5 +38,11 @@
 
     <style name="LastUpdateWidget">
         <item name="android:textSize">8sp</item>
+        <item name="android:textColor">#FFF</item>
+    </style>
+
+    <style name="TitleWidget">
+        <item name="android:textSize">19sp</item>
+        <item name="android:textColor">#FFF</item>
     </style>
 </resources>

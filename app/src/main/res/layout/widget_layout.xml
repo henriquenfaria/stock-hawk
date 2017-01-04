@@ -21,7 +21,7 @@
             android:paddingLeft="@dimen/widget_layout_title_padding_start"
             android:paddingStart="@dimen/widget_layout_title_padding_start"
             android:text="@string/app_name"
-            android:textAppearance="@android:style/TextAppearance.Large"/>
+            android:textAppearance="@style/TitleWidget"/>
 
         <TextView
             android:id="@+id/last_update"
