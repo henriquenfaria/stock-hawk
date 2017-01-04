@@ -125,6 +125,7 @@ public class StockDetailFragment extends Fragment {
         return view;
     }
 
+    // Generates the Stock Chart based on a List of Entries
     private void generateStockChart(List<Entry> entries) {
         mLineChart.setNoDataText(getString(R.string.status_loading_chart_data));
         Collections.sort(entries, new EntryXComparator());

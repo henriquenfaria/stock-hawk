@@ -8,8 +8,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -103,8 +101,9 @@ public class StockListFragment extends Fragment implements LoaderManager
     public void onStart() {
         super.onStart();
         QuoteSyncJob.syncImmediately(mContext, QuoteSyncJob.JOB_TAG_ONE_OFF);
-        QuoteSyncJob.schedulePeriodic(mContext, QuoteSyncJob.JOB_TAG_PERIODIC, QuoteSyncJob.PERIOD_SYNC);
-        if (!networkUp()) {
+        QuoteSyncJob.schedulePeriodic(mContext, QuoteSyncJob.JOB_TAG_PERIODIC, QuoteSyncJob
+                .PERIOD_SYNC);
+        if (!Utils.isNetworkAvailable(mContext)) {
             Toast.makeText(mContext, R.string.toast_no_please_check_connectivity, Toast
                     .LENGTH_LONG).show();
         }
@@ -187,13 +186,6 @@ public class StockListFragment extends Fragment implements LoaderManager
         return view;
     }
 
-    private boolean networkUp() {
-        ConnectivityManager cm =
-                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnectedOrConnecting();
-    }
-
     @Override
     public void onRefresh() {
 
@@ -202,7 +194,7 @@ public class StockListFragment extends Fragment implements LoaderManager
         if (mAdapter.getItemCount() == 0) {
             mSwipeRefreshLayout.setRefreshing(false);
             mErrorTextView.setVisibility(View.VISIBLE);
-        } else if (!networkUp()) {
+        } else if (!Utils.isNetworkAvailable(mContext)) {
             mSwipeRefreshLayout.setRefreshing(false);
             Toast.makeText(mContext, R.string.toast_no_connectivity, Toast.LENGTH_LONG).show();
         } else {
@@ -210,10 +202,11 @@ public class StockListFragment extends Fragment implements LoaderManager
         }
     }
 
+    // Add stock in the content provider
     void addStock(String symbol) {
         if (symbol != null && !symbol.isEmpty()) {
 
-            if (networkUp()) {
+            if (Utils.isNetworkAvailable(mContext)) {
                 mSwipeRefreshLayout.setRefreshing(true);
             } else {
                 String message = getString(R.string.toast_stock_added_no_connectivity, symbol);
@@ -355,7 +348,6 @@ public class StockListFragment extends Fragment implements LoaderManager
     public interface OnStockListFragmentListener {
         void onStockListFragmentListener(String symbol, String history, int type);
     }
-
 
     public class SyncEndReceiver extends BroadcastReceiver {
         @Override

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -24,6 +26,7 @@ public final class Utils {
     private Utils() {
     }
 
+    // Gets stock display mode
     public static String getDisplayMode(Context context) {
         String key = context.getString(R.string.pref_display_mode_key);
         String defaultValue = context.getString(R.string.pref_display_mode_default);
@@ -31,6 +34,7 @@ public final class Utils {
         return prefs.getString(key, defaultValue);
     }
 
+    // Toggles the stock display mode
     public static void toggleDisplayMode(Context context) {
         String key = context.getString(R.string.pref_display_mode_key);
         String absoluteKey = context.getString(R.string.pref_display_mode_absolute_key);
@@ -48,6 +52,7 @@ public final class Utils {
         editor.apply();
     }
 
+    // Creates a List of Entries based in the history string list returned from the content provider
     public static List<Entry> createEntryListFromString(String histStringList)
             throws NumberFormatException {
         ArrayList<Entry> entries = new ArrayList<>();
@@ -67,6 +72,7 @@ public final class Utils {
         return entries;
     }
 
+    // Formats a milliseconds timestamp in locale format without the time
     public static String formatMillisecondsForLocale(long timeInMilliseconds) {
         SimpleDateFormat dateInstance = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat
                 .SHORT, Locale.getDefault());
@@ -76,6 +82,7 @@ public final class Utils {
         return date;
     }
 
+    // Formats a milliseconds timestamp in locale format with the time
     public static String formatMillisecondsForLocaleWithTime(long timeInMilliseconds) {
         SimpleDateFormat dateInstance = (SimpleDateFormat) DateFormat.getDateTimeInstance(
                 DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
@@ -85,13 +92,14 @@ public final class Utils {
         return date;
     }
 
-
+    // Send system broadcast to update all stock hawk widgets
     public static void updateWidgets(Context context) {
         Intent updateWidgetsIntent = new Intent(Constants.Action.ACTION_UPDATE_WIDGETS)
                 .setPackage(context.getPackageName());
         context.sendBroadcast(updateWidgetsIntent);
     }
 
+    // Checks if phone has RTL enabled
     public static boolean isRTL(Context ctx) {
         Configuration config = ctx.getResources().getConfiguration();
 
@@ -102,6 +110,7 @@ public final class Utils {
         }
     }
 
+    // Saves the last successful update from the Yahoo API
     public static void saveLastUpdate(Context context, long time) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = prefs.edit();
@@ -110,8 +119,17 @@ public final class Utils {
 
     }
 
+    // Gets the last saved update from shared preferences
     public static long getLastUpdate(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getLong(Constants.Pref.PREFERENCE_LAST_UPDATE, 0);
+    }
+
+    // Returns true if there's network connection available
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager cm =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnectedOrConnecting();
     }
 }
