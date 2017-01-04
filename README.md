@@ -10,10 +10,9 @@ We also provide users a helpful widget that easily displays all his saved stocks
 Screens
 ------
 
-![alt text](https://github.com/henriquenfaria/popular-movies-stage-2/blob/master/art/stage2_phone_portrait_list.png "Phone Details")
-![alt text](https://github.com/henriquenfaria/popular-movies-stage-2/blob/master/art/stage2_phone_portrait_detail.png "Phone Details")
-![alt text](https://github.com/henriquenfaria/popular-movies-stage-2/blob/master/art/stage2_tablet_landscape.png "Tablet")
-![alt text](https://github.com/henriquenfaria/popular-movies-stage-2/blob/master/art/stage2_tablet_landscape.png "Tablet")
+![alt text](https://github.com/henriquenfaria/stock-hawk/blob/master/art/phone_portrait_app.png "Phone")
+![alt text](https://github.com/henriquenfaria/stock-hawk/blob/master/art/phone_portrait_widget.png "Widget")
+![alt text](https://github.com/henriquenfaria/stock-hawk/blob/master/art/tablet_landscape_app.png "Tablet")
 
 
 Libraries
