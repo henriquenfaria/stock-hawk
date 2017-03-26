@@ -20,17 +20,17 @@ Libraries
 
 This project uses the following libraries:
 
-[YahooFinanceAPI] (http://financequotes-api.com/)
+[YahooFinanceAPI](http://financequotes-api.com/)
 
-[MPAndroidChart] (https://github.com/PhilJay/MPAndroidChart)
+[MPAndroidChart](https://github.com/PhilJay/MPAndroidChart)
 
-[Firebase JobDispatcher] (https://github.com/firebase/firebase-jobdispatcher-android)
+[Firebase JobDispatcher](https://github.com/firebase/firebase-jobdispatcher-android)
 
-[Butter Knife] (http://jakewharton.github.io/butterknife/)
+[Butter Knife](http://jakewharton.github.io/butterknife/)
 
-[FloatingActionButton] (https://github.com/makovkastar/FloatingActionButton)
+[FloatingActionButton](https://github.com/makovkastar/FloatingActionButton)
 
-[timber] (https://github.com/JakeWharton/timber)
+[timber](https://github.com/JakeWharton/timber)
 
 
 License
