@@ -2,7 +2,8 @@ Stock Hawk
 ======
 
 This is Stock Hawk project of Udacity's Android Developer Nanodegree.
-The purpose of this project was to built an app that helps users in the process of monitoring NASDAQ stocks.
+
+The purpose of this project was to build an app that helps users in the process of monitoring NASDAQ stocks.
 The app has a minimalistic design. It allow users to change between daily stock percentage and stock value variation. 
 We also provide users a helpful widget that easily displays all his saved stocks.
 
